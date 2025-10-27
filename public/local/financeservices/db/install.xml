@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<XMLDB PATH="local/financeservices/db" VERSION="2025042703" COMMENT="Finance Services Plugin">
+
+  <TABLES>
+
+    <!-- Finance service requests -->
+    <TABLE NAME="local_financeservices" COMMENT="Finance service requests">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" UNSIGNED="true" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="course_id" TYPE="int" LENGTH="10" UNSIGNED="true" NOTNULL="true"/>
+        <FIELD NAME="funding_type_id" TYPE="int" LENGTH="10" UNSIGNED="true" NOTNULL="true"/>
+        <FIELD NAME="price_requested" TYPE="float" UNSIGNED="true" NOTNULL="true"/>
+        <FIELD NAME="notes" TYPE="text" NOTNULL="false"/>
+        <FIELD NAME="user_id" TYPE="int" LENGTH="10" UNSIGNED="true" NOTNULL="true"/>
+        <FIELD NAME="date_time_requested" TYPE="int" LENGTH="10" UNSIGNED="true" NOTNULL="true"/>
+        <FIELD NAME="date_time_processed" TYPE="int" LENGTH="10" UNSIGNED="true" NOTNULL="false"/>
+        <FIELD NAME="date_type_required" TYPE="int" LENGTH="10" UNSIGNED="true" NOTNULL="false"/>
+        <FIELD NAME="date_time_submitted" TYPE="int" LENGTH="10" UNSIGNED="true" NOTNULL="false"/>
+        <FIELD NAME="cause" TYPE="text" NOTNULL="false"/>
+        <FIELD NAME="rejection_note" TYPE="text" NOTNULL="false"/>
+        <FIELD NAME="approval_note" TYPE="text" NOTNULL="false"/>
+        <FIELD NAME="status_id" TYPE="int" LENGTH="10" UNSIGNED="true" NOTNULL="true"/>
+        <FIELD NAME="clause_id" TYPE="int" LENGTH="10" UNSIGNED="true" NOTNULL="false"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="status_fk" TYPE="foreign" FIELDS="status_id" REFTABLE="local_status" REFFIELDS="id"/>
+        <KEY NAME="clause_fk" TYPE="foreign" FIELDS="clause_id" REFTABLE="local_financeservices_clause" REFFIELDS="id"/>
+      </KEYS>
+      <INDEXES>
+        <INDEX NAME="course_id_idx" UNIQUE="false" FIELDS="course_id"/>
+        <INDEX NAME="funding_type_id_idx" UNIQUE="false" FIELDS="funding_type_id"/>
+      </INDEXES>
+    </TABLE>
+
+    <!-- Funding types -->
+    <TABLE NAME="local_financeservices_funding_type" COMMENT="Funding types">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" UNSIGNED="true" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="funding_type_en" TYPE="char" LENGTH="255" NOTNULL="true"/>
+        <FIELD NAME="funding_type_ar" TYPE="char" LENGTH="255" NOTNULL="true"/>
+        <FIELD NAME="deleted" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" COMMENT="Soft-delete flag"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+      </KEYS>
+    </TABLE>
+
+    <!-- Clauses -->
+    <TABLE NAME="local_financeservices_clause" COMMENT="Clauses for finance requests">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" UNSIGNED="true" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="clause_name_en" TYPE="char" LENGTH="255" NOTNULL="true"/>
+        <FIELD NAME="clause_name_ar" TYPE="char" LENGTH="255" NOTNULL="true"/>
+        <FIELD NAME="amount"  TYPE="float"  NOTNULL="true"/>
+        <FIELD NAME="deleted" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" COMMENT="Soft-delete flag"/>
+        <FIELD NAME="created_by" TYPE="int" LENGTH="10" UNSIGNED="true" NOTNULL="true"/>
+        <FIELD NAME="created_date" TYPE="int" LENGTH="10" UNSIGNED="true" NOTNULL="true"/>
+        <FIELD NAME="clause_year" TYPE="int" LENGTH="4" UNSIGNED="true" NOTNULL="true" COMMENT="Calendar year of the clause"/>
+        <FIELD NAME="modified_by" TYPE="int" LENGTH="10" UNSIGNED="true" NOTNULL="false"/>
+        <FIELD NAME="modified_date" TYPE="int" LENGTH="10" UNSIGNED="true" NOTNULL="false"/>
+        <FIELD NAME="initial_amount" TYPE="float" NOTNULL="true" COMMENT="Original amount when first created"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+      </KEYS>
+      <INDEXES>
+        <INDEX NAME="uniq_clause_en_year" UNIQUE="true" FIELDS="clause_name_en, clause_year"/>
+        <INDEX NAME="uniq_clause_ar_year" UNIQUE="true" FIELDS="clause_name_ar, clause_year"/>
+      </INDEXES>
+    </TABLE>
+
+  </TABLES>
+</XMLDB>

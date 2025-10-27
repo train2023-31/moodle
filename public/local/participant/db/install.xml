@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<XMLDB PATH="local/participant/db" VERSION="2023100201" COMMENT="Training Participant and External Lecturer Request Management System">
+    <TABLES>
+        <!-- Main table for storing participant and external lecturer service requests -->
+        <TABLE NAME="local_participant_requests" COMMENT="Training participant service requests - handles both internal staff and external lecturer requests for courses">
+            <FIELDS>
+                <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true" 
+                       COMMENT="Unique request identifier - auto-incrementing primary key"/>
+                
+                <FIELD NAME="course_id" TYPE="int" LENGTH="10" NOTNULL="true" 
+                       COMMENT="References {course}.id - The Moodle course for which participant services are requested"/>
+                
+                <FIELD NAME="annual_plan_id" TYPE="int" LENGTH="10" NOTNULL="true" 
+                       COMMENT="References {local_annual_plan}.id - Links request to the institutional annual training plan"/>
+                
+                <FIELD NAME="participant_type_id" TYPE="int" LENGTH="10" NOTNULL="true" 
+                       COMMENT="References {local_participant_request_types}.id - Type of participant service (role player, lecturer, etc.)"/>
+                
+                <FIELD NAME="external_lecturer_id" TYPE="int" LENGTH="10" NOTNULL="false" 
+                       COMMENT="References {externallecturer}.id - Required only when participant_type_id=5 (External Lecturer), NULL for internal participants"/>
+                
+                <!-- Removed deprecated internal_user_id; use pf_number and participant_full_name instead -->
+                
+                <FIELD NAME="pf_number" TYPE="char" LENGTH="50" NOTNULL="false" 
+                       COMMENT="PF number from Oracle database for internal participants (e.g., PF12345)"/>
+                
+                <FIELD NAME="participant_full_name" TYPE="char" LENGTH="255" NOTNULL="false" 
+                       COMMENT="Full name of participant from Oracle database (e.g., John Doe)"/>
+                
+                <FIELD NAME="is_internal_participant" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="1" 
+                       COMMENT="Boolean flag: 1=Internal participant from organization, 0=External lecturer/consultant"/>
+                
+                <FIELD NAME="duration_amount" TYPE="int" LENGTH="10" NOTNULL="true" 
+                       COMMENT="Service duration quantity - measured in days for role players, hours for lecturers/evaluators"/>
+                
+                <FIELD NAME="compensation_amount" TYPE="FLOAT" NOTNULL="true" 
+                       COMMENT="Total compensation/cost amount in local currency (Omani Rial) - calculated from duration × rate"/>
+                
+                <FIELD NAME="request_status_id" TYPE="int" LENGTH="10" NOTNULL="true" 
+                       COMMENT="References {local_status}.id - Workflow status from participants_workflow (type_id=9)"/>
+                
+                <FIELD NAME="requested_date" TYPE="DATETIME" NOTNULL="true" 
+                       COMMENT="Date when the participant service is needed - the actual service delivery date"/>
+                
+                <FIELD NAME="is_approved" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" 
+                       COMMENT="Boolean approval flag: 0=Not approved, 1=Approved - redundant with status_id but kept for quick filtering"/>
+                
+                <FIELD NAME="rejection_reason" TYPE="text" NOTNULL="false" 
+                       COMMENT="Optional detailed explanation when request is rejected - provides feedback to requestor"/>
+                
+                <FIELD NAME="created_by" TYPE="int" LENGTH="10" NOTNULL="false" 
+                       COMMENT="References {user}.id - User who submitted the request"/>
+                
+                <FIELD NAME="time_created" TYPE="int" LENGTH="10" NOTNULL="false" 
+                       COMMENT="UNIX timestamp when request was submitted to the system"/>
+                
+                <FIELD NAME="time_modified" TYPE="int" LENGTH="10" NOTNULL="false" 
+                       COMMENT="UNIX timestamp when request was last updated (status change, modifications, etc.)"/>
+
+                 <FIELD NAME="modified_by" TYPE="int" LENGTH="10" NOTNULL="false"
+                        COMMENT="References {user}.id - User who last modified/acted on the request"/>
+            </FIELDS>
+
+            <KEYS>
+                <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+                <KEY NAME="participant_type_fk" TYPE="foreign" FIELDS="participant_type_id" REFTABLE="local_participant_request_types" REFFIELDS="id"/>
+                <KEY NAME="request_status_workflow_fk" TYPE="foreign" FIELDS="request_status_id" REFTABLE="local_status" REFFIELDS="id"/>
+            </KEYS>
+        </TABLE>
+
+        <!-- Table for request types -->
+        <TABLE NAME="local_participant_request_types" COMMENT="Table for request types">
+            <FIELDS>
+                <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true" COMMENT="Primary key"/>
+                <FIELD NAME="name_en" TYPE="char" LENGTH="255" NOTNULL="false" COMMENT="Type Name in English"/>
+                <FIELD NAME="name_ar" TYPE="char" LENGTH="255" NOTNULL="false" COMMENT="Type Name in Arabic"/>
+                <FIELD NAME="cost" TYPE="number" LENGTH="10" DECIMALS="2" NOTNULL="false" COMMENT="Cost/Reward amount for this type"/>
+                <FIELD NAME="calculation_type" TYPE="char" LENGTH="10" NOTNULL="true" DEFAULT="days" COMMENT="How cost is calculated: days, hours, or dynamic"/>
+                <FIELD NAME="description" TYPE="text" NOTNULL="false" COMMENT="Description of the request type"/>
+                <FIELD NAME="active" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="1" COMMENT="Whether this type is active"/>
+                <FIELD NAME="createdby" TYPE="int" LENGTH="10" NOTNULL="false" COMMENT="User who created the entry"/>
+                <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="false" COMMENT="UNIX timestamp for creation time"/>
+            </FIELDS>
+
+            <KEYS>
+                <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+            </KEYS>
+        </TABLE>
+
+        <!-- Note: Status management now handled by local_status plugin (participants_workflow with type_id=9) -->
+    </TABLES>
+</XMLDB>

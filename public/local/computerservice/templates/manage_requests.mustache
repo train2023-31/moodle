@@ -1,0 +1,290 @@
+{{#filter}}
+<form class="filter-form" method="get" action="{{form_action}}" id="filter-form" dir="rtl">
+    <input type="hidden" name="tab" value="manage">
+
+    <!-- Course -->
+    <div class="form-group">
+        <label for="course_filter">{{#str}}choosecourse, local_computerservice{{/str}}</label>
+        <select name="courseid" id="course_filter">
+            <option value="">{{#str}}allcourses, local_computerservice{{/str}}</option>
+            {{#courses}}
+                <option value="{{id}}" {{#selected}}selected{{/selected}}>{{fullname}}</option>
+            {{/courses}}
+        </select>
+    </div>
+
+    <!-- User -->
+    <div class="form-group">
+        <label for="user_filter">{{#str}}chooseuser, local_computerservice{{/str}}</label>
+        <select name="userid" id="user_filter">
+            <option value="">{{#str}}allusers, local_computerservice{{/str}}</option>
+            {{#users}}
+                <option value="{{id}}" {{#selected}}selected{{/selected}}>{{fullname}}</option>
+            {{/users}}
+        </select>
+    </div>
+
+    <!-- Status -->
+    <div class="form-group">
+        <label for="status_filter">{{#str}}statusfilter, local_computerservice{{/str}}</label>
+        <select name="statusid" id="status_filter">
+            <option value="">{{#str}}allstatuses, local_computerservice{{/str}}</option>
+            {{#statuses}}
+                <option value="{{id}}" {{#selected}}selected{{/selected}}>{{name}}</option>
+            {{/statuses}}
+        </select>
+    </div>
+
+    <!-- Urgency -->
+    <div class="form-group">
+        <label for="urgency_filter">{{#str}}urgencyfilter, local_computerservice{{/str}}</label>
+        <select name="urgency" id="urgency_filter">
+            {{#urgency_options}}
+                <option value="{{value}}" {{#selected}}selected{{/selected}}>{{label}}</option>
+            {{/urgency_options}}
+        </select>
+    </div>
+
+    <button type="submit" class="btn btn-primary"><i class="fa fa-search"></i>&nbsp;&nbsp; {{#str}}filter, local_computerservice{{/str}}</button>
+    <button type="button" class="btn btn-secondary clear-btn" onclick="clearFilters()">{{#str}}clearfilters, local_computerservice{{/str}}</button>
+</form>
+
+<script>
+function clearFilters() {
+    document.getElementById('filter-form').reset();
+    window.location.href = '{{form_action}}';
+}
+</script>
+{{/filter}}
+
+<!-- Responsive Table Wrapper -->
+<div class="table-responsive">
+
+    <!-- CSV Export Button -->
+    <button class="export-csv btn btn-outline-info">
+        CSV <i class="fas fa-download"></i>
+    </button>
+
+    <style>
+    /* Styling for rejection notes */
+    .rejection-note-display {
+        background-color: #fff3cd;
+        border: 1px solid #ffeaa7;
+        border-radius: 4px;
+        padding: 4px 8px;
+        display: inline-block;
+        font-style: italic;
+    }
+    
+    .status-cell .text-danger {
+        margin-bottom: 5px;
+    }
+    
+    /* Make rejection notes more prominent when moved backwards */
+    .was-rejected-backwards .rejection-note-display {
+        background-color: #f8d7da;
+        border-color: #f5c6cb;
+        font-weight: 500;
+    }
+    
+    /* Styling for urgent requests */
+    .urgent-request {
+        background-color: #fff5f5;
+        border-left: 4px solid #dc3545;
+    }
+    
+    .urgent-request:hover {
+        background-color: #ffe6e6;
+    }
+    </style>
+
+    <!-- Requests Table -->
+    <table class="custom-table">
+        <thead>
+            <tr>
+                <th>{{#str}} course,              local_computerservice {{/str}}</th>
+                <th>{{#str}} user,                local_computerservice {{/str}}</th>
+                <th>{{#str}} devices,             local_computerservice {{/str}}</th>
+                <th>{{#str}} numdevices,          local_computerservice {{/str}}</th>
+                <th>{{#str}} timecreated,         local_computerservice {{/str}}</th>
+                <th>{{#str}} request_needed_by,   local_computerservice {{/str}}</th>
+                <th>{{#str}} urgent_status,    local_computerservice {{/str}}</th>
+                <th>{{#str}} comments,            local_computerservice {{/str}}</th>
+                <th>{{#str}} status,              local_computerservice {{/str}}</th>
+                <th>{{#str}} action, local_computerservice {{/str}}</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            {{#requests}}
+            <tr class="{{urgent_class}} {{#was_rejected_and_moved_back}}was-rejected-backwards{{/was_rejected_and_moved_back}}">
+                <td>{{coursefullname}}</td>
+                <td>{{userfullname}}</td>
+                <td>{{devices}}</td>
+                <td>{{numdevices}}</td>
+                <td>{{timecreated}}</td>
+                <td>{{request_needed_by}}</td>
+                <td>
+                    {{#is_urgent}}
+                        <span class="badge bg-danger">{{#str}} urgent, local_computerservice {{/str}}</span>
+                    {{/is_urgent}}
+                    {{^is_urgent}}
+                        <span class="badge bg-secondary">{{#str}} not_urgent, local_computerservice {{/str}}</span>
+                    {{/is_urgent}}
+                </td>
+                <td>{{comments}}</td>
+                <td class="status-cell">
+                    <!-- Workflow status with color coding -->
+                    <span class="{{#status_is_approved}}text-success{{/status_is_approved}}{{#status_is_initial}}text-warning{{/status_is_initial}}{{#status_is_rejected}}text-danger{{/status_is_rejected}}">
+                        {{status}}
+                    </span>
+
+                    <!-- Show REJECTION note when rejected and moved backwards OR in final rejected status -->
+                    {{#was_rejected_and_moved_back}}
+                      <div class="text-danger small mt-1">
+                        <strong>{{#str}}previously_rejected, local_computerservice{{/str}} - {{#str}}rejection_reason, local_computerservice{{/str}}:</strong> 
+                        <span class="rejection-note-display was-rejected-backwards">{{rejection_note}}</span>
+                      </div>
+                    {{/was_rejected_and_moved_back}}
+
+                    <!-- Show REJECTION note in final rejected status -->
+                    {{#status_is_rejected}}
+                      {{#rejection_note}}
+                      <div class="text-danger small mt-1">
+                        <strong>{{#str}}rejection_reason, local_computerservice{{/str}}:</strong> 
+                        <span class="rejection-note-display">{{rejection_note}}</span>
+                      </div>
+                      {{/rejection_note}}
+                    {{/status_is_rejected}}
+
+                    <!-- Show APPROVAL note only in approved state -->
+                    {{#status_is_approved}}
+                      {{#approval_note}}
+                      <div class="text-success small mt-1">
+                        <strong>{{#str}}approval_note, local_computerservice{{/str}}:</strong> {{approval_note}}
+                      </div>
+                      {{/approval_note}}
+                    {{/status_is_approved}}
+                </td>
+
+                <td>
+                    {{#canchangestatus}}
+                        {{#can_approve}}
+                            <!-- Show buttons only if user can approve and status is not final -->
+                            {{^is_final}}
+                                <!-- Approve Button -->
+                                <button
+                                    onclick="showModal(
+                                        '{{#str}}confirm, core{{/str}}',
+                                        '{{#str}}approve_next, local_computerservice{{/str}}?',
+                                        () => approveHandler({{id}})
+                                    )"
+                                    class="btn btn-sm btn-success"
+                                >
+                                    {{#str}}approve_next, local_computerservice{{/str}}
+                                </button>
+
+                                <!-- Reject Button -->
+                                <button
+                                    onclick="showModal(
+                                        '{{#str}}confirm, core{{/str}}',
+                                        '{{#str}}reject, local_computerservice{{/str}}?',
+                                        (note) => rejectHandler(note, {{id}}),
+                                        true /* note-field */
+                                    )"
+                                    class="btn btn-sm btn-danger"
+                                >
+                                    {{#str}}reject, local_computerservice{{/str}}
+                                </button>
+                            {{/is_final}}
+
+                            <!-- Show status messages when final -->
+                            {{#is_final}}
+                                {{#status_is_rejected}}
+                                    <span class="text-danger">{{#str}}status_rejected, local_computerservice{{/str}}</span>
+                                {{/status_is_rejected}}
+                                {{#status_is_approved}}
+                                    <span class="text-success">{{#str}}status_approved, local_computerservice{{/str}}</span>
+                                {{/status_is_approved}}
+                            {{/is_final}}
+                        {{/can_approve}}
+
+                        {{^can_approve}}
+                            <!-- Show status messages for users who can't approve -->
+                            {{#status_is_rejected}}
+                                <span class="text-danger">{{#str}}status_rejected, local_computerservice{{/str}}</span>
+                            {{/status_is_rejected}}
+                            {{#status_is_approved}}
+                                <span class="text-success">{{#str}}status_approved, local_computerservice{{/str}}</span>
+                            {{/status_is_approved}}
+                            {{^status_is_rejected}}
+                                {{^status_is_approved}}
+                                    <span class="text-muted">{{#str}}awaiting_approval, local_computerservice{{/str}}</span>
+                                {{/status_is_approved}}
+                            {{/status_is_rejected}}
+                        {{/can_approve}}
+                    {{/canchangestatus}}
+                </td>
+            </tr>
+            {{/requests}}
+        </tbody>
+    </table>
+</div>
+
+{{^requests}}
+<div class="alert alert-info">
+    {{#str}} norequests, local_computerservice {{/str}}
+</div>
+{{/requests}}
+
+<script>
+/**
+ * Approve a request by ID
+ */
+function approveHandler(requestId) {
+  const actionUrlBase = '{{{ js.action_url_base }}}';
+  const sesskey       = '{{{ js.sesskey }}}';
+
+  fetch(actionUrlBase, {
+    method : 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body   : JSON.stringify({action:'approve', id:requestId, sesskey}),
+    credentials: 'same-origin'
+  })
+  .then(r => r.json())
+  .then(() => location.reload())
+  .catch(console.error);
+}
+
+/**
+ * Reject a request with a note
+ */
+function rejectHandler(note, requestId) {
+  const actionUrlBase = '{{{ js.action_url_base }}}';
+  const sesskey       = '{{{ js.sesskey }}}';
+
+  fetch(actionUrlBase, {
+    method : 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body   : JSON.stringify({action:'reject', id:requestId, rejection_note:note, sesskey}),
+    credentials: 'same-origin'
+  })
+  .then(r => r.json())
+  .then(() => location.reload())
+  .catch(console.error);
+}
+</script>
+
+<style>
+.urgent-request {
+    background-color: #ffcccc !important;
+    color: #a94442 !important;
+    font-weight: bold;
+}
+.custom-table th {
+    background-color: #f8f9fa;
+}
+#page-local-computerservice-index #id_filterhdr {
+    border: none;
+}
+</style>

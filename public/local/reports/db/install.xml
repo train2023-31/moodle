@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<XMLDB PATH="local/reports/db"
+       VERSION="2025041701"
+       COMMENT="XMLDB file for Moodle local/reports plugin"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:noNamespaceSchemaLocation="../../../lib/xmldb/xmldb.xsd">
+
+  <TABLES>
+
+    <!-- ========== main report table ========== -->
+    <TABLE NAME="local_reports" COMMENT="Individual student reports">
+      <FIELDS>
+        <FIELD NAME="id"            TYPE="int"  LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="userid"        TYPE="int"  LENGTH="10" NOTNULL="true"/>
+        <FIELD NAME="courseid"      TYPE="int"  LENGTH="10" NOTNULL="true"/>
+        <FIELD NAME="futureexpec"   TYPE="text"                           NOTNULL="false"/>
+        <FIELD NAME="dep_op"        TYPE="text"                           NOTNULL="false"/>
+        <FIELD NAME="seg_path"      TYPE="text"                           NOTNULL="false"/>
+        <FIELD NAME="researchtitle" TYPE="text"                           NOTNULL="false"/>
+        <FIELD NAME="status_id"     TYPE="int"  LENGTH="10" NOTNULL="true"  DEFAULT="0"/>
+        <FIELD NAME="type_id"       TYPE="int"  LENGTH="10" NOTNULL="true"  DEFAULT="0"/>
+        <FIELD NAME="timecreated"   TYPE="int"  LENGTH="10" NOTNULL="true"/>
+        <FIELD NAME="timemodified"  TYPE="int"  LENGTH="10" NOTNULL="true"/>
+        <FIELD NAME="createdby"     TYPE="int"  LENGTH="10" NOTNULL="true"/>
+        <FIELD NAME="modifiedby"    TYPE="int"  LENGTH="10" NOTNULL="true"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="user_fk" TYPE="foreign" FIELDS="userid"     REFTABLE="user"    REFFIELDS="id"/>
+        <KEY NAME="course_fk" TYPE="foreign" FIELDS="courseid" REFTABLE="course"  REFFIELDS="id"/>
+      </KEYS>
+      <INDEXES>
+        <INDEX NAME="course_user_ix" UNIQUE="false" FIELDS="courseid,userid"/>
+      </INDEXES>
+    </TABLE>
+
+    <!-- ========== report type lookup ========== -->
+    <TABLE NAME="local_report_type" COMMENT="Lookup for report types">
+      <FIELDS>
+        <FIELD NAME="id"                 TYPE="int"  LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="report_type_string_en" TYPE="char" LENGTH="255" NOTNULL="true"/>
+        <FIELD NAME="report_type_string_ar" TYPE="char" LENGTH="255" NOTNULL="true"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+      </KEYS>
+    </TABLE>
+
+  </TABLES>
+
+</XMLDB>

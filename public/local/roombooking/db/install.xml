@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<XMLDB PATH="local/roombooking/db" VERSION="2025061601" COMMENT="XMLDB file for Moodle local/roombooking"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="../../../lib/xmldb/xmldb.xsd"
+>
+  <TABLES>
+    <!-- Table to store details of available rooms -->
+    <TABLE NAME="local_roombooking_rooms" COMMENT="Table for storing room details">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="name" TYPE="char" LENGTH="255" NOTNULL="true" COMMENT="Name of the room"/>
+        <FIELD NAME="capacity" TYPE="int" LENGTH="10" NOTNULL="true" COMMENT="Room capacity"/>
+        <FIELD NAME="roomtype" TYPE="char" LENGTH="255" NOTNULL="true" COMMENT="Type of the room"/>
+        <FIELD NAME="location" TYPE="char" LENGTH="255" NOTNULL="false" COMMENT="Room location"/>
+        <FIELD NAME="description" TYPE="text" NOTNULL="false" COMMENT="Additional room description"/>
+        <FIELD NAME="deleted"    TYPE="int"  LENGTH="1"   NOTNULL="true"  DEFAULT="0" COMMENT="Soft-delete flag"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+      </KEYS>
+    </TABLE>
+
+    <!-- Table for booking course rooms -->
+    <TABLE NAME="local_roombooking_course_bookings" COMMENT="Stores course room bookings">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="courseid" TYPE="int" LENGTH="10" NOTNULL="true"/>
+        <FIELD NAME="roomid" TYPE="int" LENGTH="10" NOTNULL="true"/>
+        <FIELD NAME="starttime" TYPE="int" LENGTH="10" NOTNULL="true"/>
+        <FIELD NAME="endtime" TYPE="int" LENGTH="10" NOTNULL="true"/>
+        <FIELD NAME="recurrence" TYPE="int" LENGTH="4" NOTNULL="true"/>
+        <FIELD NAME="capacity" TYPE="int" LENGTH="10" NOTNULL="true" COMMENT="Requested room capacity"/>
+        <FIELD NAME="userid" TYPE="int" LENGTH="10" NOTNULL="true"/>
+        <FIELD NAME="groupid" TYPE="char" LENGTH="255" NOTNULL="true" COMMENT="Group ID for recurring bookings"/>
+        <FIELD NAME="recurrence_end_date" TYPE="int" LENGTH="10" NOTNULL="false" COMMENT="End date for recurring bookings"/>
+
+        <!-- Replaces old status field with a link to local_status -->
+        <FIELD NAME="status_id" TYPE="int" LENGTH="10" NOTNULL="true" COMMENT="FK to local_status for approval workflow"/>
+        <FIELD NAME="approval_note" TYPE="text" NOTNULL="false" COMMENT="Optional comment from approver"/>
+        <FIELD NAME="rejection_note" TYPE="text" NOTNULL="false" COMMENT="Reason for rejection (if any)"/>
+
+        <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true"/>
+        <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="false"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="courseid_fk" TYPE="foreign" FIELDS="courseid" REFTABLE="course" REFFIELDS="id"/>
+        <KEY NAME="roomid_fk" TYPE="foreign" FIELDS="roomid" REFTABLE="local_roombooking_rooms" REFFIELDS="id"/>
+        <KEY NAME="userid_fk" TYPE="foreign" FIELDS="userid" REFTABLE="user" REFFIELDS="id"/>
+        <KEY NAME="status_fk" TYPE="foreign" FIELDS="status_id" REFTABLE="local_status" REFFIELDS="id"/>
+      </KEYS>
+      <INDEXES>
+        <INDEX NAME="user_status_ix" UNIQUE="false" FIELDS="userid, status_id"/>
+      </INDEXES>
+    </TABLE>
+  </TABLES>
+</XMLDB>

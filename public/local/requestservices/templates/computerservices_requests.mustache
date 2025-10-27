@@ -1,0 +1,62 @@
+<table class="custom-table">
+    
+        <thead>
+            <tr>
+                <th>{{#str}}course, local_requestservices{{/str}}</th>
+                <th>{{#str}}numdevices, local_requestservices{{/str}}</th>
+                <th>{{#str}}devices, local_requestservices{{/str}}</th>
+                <th>{{#str}}requestdate, local_requestservices{{/str}}</th>
+                <th>{{#str}}status, local_requestservices{{/str}}</th>
+            </tr>
+        </thead>
+        <tbody>
+            {{#computerservices}}
+            <tr>
+                <td>{{course}}</td>
+                <td>{{numdevices}}</td>
+                <td>{{devices}}</td>
+                <td>{{timecreated}}</td>
+                <td>{{readable_status}}</td>
+            </tr>
+            {{/computerservices}}
+        </tbody>
+    </table>
+
+
+<script>
+function approveHandler(data) { 
+  fetch('actions/update_request_status.php', {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/x-www-form-urlencoded",
+    },
+    body: JSON.stringify(data),
+  })
+    .then(() => {
+      location.reload();
+    })
+    .catch((error) => {
+      console.error("Error:", error);
+    });
+}
+
+function rejectionHandler(rejectionNote, data) {
+  if(rejectionNote)
+    data.rejection_note = rejectionNote;
+    console.log(data)
+  fetch('actions/update_request_status.php', {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/x-www-form-urlencoded",
+    },
+    body: JSON.stringify(data),
+  })
+    .then(() => {
+    })
+    .catch((error) => {
+      console.error("Error:", error);
+    });
+}
+</script>
+
+

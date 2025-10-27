@@ -1,0 +1,146 @@
+{{#filter}}
+<form class="filter-form" method="get" action="{{form_action}}" id="filter-form" dir="rtl">
+    <input type="hidden" name="tab" value="viewrequests">
+
+    <!-- Course -->
+    <div class="form-group">
+        <label for="course_id_filter">{{#str}}course, local_participant{{/str}}</label>
+        <select name="course_id" id="course_id_filter">
+            <option value="">{{#str}}allcourses, local_participant{{/str}}</option>
+            {{#courses}}
+                <option value="{{id}}" {{#selected}}selected{{/selected}}>{{fullname}}</option>
+            {{/courses}}
+        </select>
+    </div>
+
+    <!-- Participant Type -->
+    <div class="form-group">
+        <label for="participant_type_filter">{{#str}}participanttype, local_participant{{/str}}</label>
+        <select name="participant_type_id" id="participant_type_filter">
+            <option value="">{{#str}}allparticipanttypes, local_participant{{/str}}</option>
+            {{#participanttypes}}
+                <option value="{{id}}" {{#selected}}selected{{/selected}}>{{name}}</option>
+            {{/participanttypes}}
+        </select>
+    </div>
+
+    <!-- Status -->
+    <div class="form-group">
+        <label for="status_filter">{{#str}}statusfilter, local_participant{{/str}}</label>
+        <select name="request_status_id" id="status_filter">
+            <option value="">{{#str}}allstatuses, local_participant{{/str}}</option>
+            {{#statuses}}
+                <option value="{{id}}" {{#selected}}selected{{/selected}}>{{name}}</option>
+            {{/statuses}}
+        </select>
+    </div>
+
+    <button type="submit" class="btn btn-primary"><i class="fa fa-search"></i>&nbsp;&nbsp; {{#str}}filter, local_participant{{/str}}</button>
+    <button type="button" class="btn btn-secondary clear-btn" onclick="clearFilters()">{{#str}}clearfilters, local_participant{{/str}}</button>
+</form>
+
+<script>
+function clearFilters() {
+    document.getElementById('filter-form').reset();
+    window.location.href = '{{form_action}}';
+}
+</script>
+{{/filter}}
+
+<div class="table-container">
+    <table class="custom-table participant-request">
+        <button class="export-csv btn btn-outline-info">CSV <i class="fas fa-download"></i></button>
+        <thead>
+            <tr>
+                <th>{{#str}}participant, local_participant{{/str}}</th>
+                <th>{{#str}}pfnumber, local_participant{{/str}}</th>
+                <th>{{#str}}course, local_participant{{/str}}</th>
+                <th>{{#str}}plan, local_participant{{/str}}</th>
+                <th>{{#str}}participanttype, local_participant{{/str}}</th>
+                <th>{{#str}}organization, local_participant{{/str}}</th>
+                <th>{{#str}}internal, local_participant{{/str}}</th>
+                <th>{{#str}}contractduration, local_participant{{/str}}</th>
+                <th>{{#str}}contractcost, local_participant{{/str}}</th>
+                <th>{{#str}}requeststatus, local_participant{{/str}}</th>
+                <th>{{#str}}requestdate, local_participant{{/str}}</th>
+                <th>{{#str}}createdby, local_participant{{/str}}</th>
+                <th>{{#str}}createddate, local_participant{{/str}}</th>
+                <th>{{#str}}actions{{/str}}</th>
+            </tr>
+        </thead>
+        <tbody>
+            {{#requests}}
+            <tr>
+                <td>{{participant_name}}</td>
+                <td>{{pf_number}}</td>
+                <td>{{course_name}}</td>
+                <td>{{plan_name}}</td>
+                <td><span class="participant-type" title="{{type_name}}" style="display: inline-block; max-width: 100px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{type_name}}</span></td>
+                <td>{{org_name}}</td>
+                <td>{{is_inside}}</td>
+                <td>{{duration_amount}} {{#str}}days, local_participant{{/str}}</td>
+                <td>{{compensation_amount}} {{#str}}currency, local_participant{{/str}}</td>
+                <td>
+                    <span class="badge badge-secondary">{{status_name}}</span>
+                    {{#has_rejection_reason}}
+                        <br><small class="text-muted">
+                            <strong>{{#str}}rejectionreason, local_participant{{/str}}:</strong> {{rejection_reason}}
+                        </small>
+                    {{/has_rejection_reason}}
+                </td>
+                <td>{{date}}</td>
+                <td>{{created_by}}</td>
+                <td>{{time_created}}</td>
+                <td>
+                    {{#is_approved}}
+                        <span class="badge badge-success">
+                            <i class="fa fa-check-circle"></i> {{#str}}requestapproved, local_participant{{/str}}
+                        </span>
+                    {{/is_approved}}
+                    {{#is_rejected}}
+                        <span class="badge badge-danger">
+                            <i class="fa fa-times-circle"></i> {{#str}}requestrejected, local_participant{{/str}}
+                        </span>
+                    {{/is_rejected}}
+                    {{^is_approved}}{{^is_rejected}}
+                        {{#can_approve}}
+                            <button class="btn btn-link" onclick="showModal('{{#str}}confirm{{/str}}', '{{#str}}confirmapprove, local_participant{{/str}}', () => approveRequestHandler({id: {{id}}}))">
+                                {{#str}}approve, local_participant{{/str}}
+                            </button>
+                        {{/can_approve}}
+                        {{#can_reject}}
+                            <button class="btn btn-link text-danger" onclick="showModal('{{#str}}confirm{{/str}}', '{{#str}}confirmreject, local_participant{{/str}}', (rejectionNote) => rejectRequestHandler({id: {{id}}, rejection_note: rejectionNote}), true)">
+                                {{#str}}reject, local_participant{{/str}}
+                            </button>
+                        {{/can_reject}}
+                        {{^can_approve}}{{^can_reject}}
+                            <span class="text-muted">{{#str}}noactions, local_participant{{/str}}</span>
+                        {{/can_reject}}{{/can_approve}}
+                    {{/is_rejected}}{{/is_approved}}
+                </td>
+            </tr>
+            {{/requests}}
+        </tbody>
+    </table>
+
+    <div class="custom-table-controls">
+        <div class="total-rows">
+            <span class="alt-text">{{#str}}total{{/str}}</span> {{totalrequests}}
+        </div>
+
+        <div class="pagination-controls">
+            <form method="get" id="perpage-form" class="perpage-form">
+                <label for="perpage" class="alt-text">{{#str}}recordsperpage, local_participant{{/str}}</label>
+                <select class="custom-select" name="perpage" id="perpage" onchange="document.getElementById('perpage-form').submit();">
+                    {{#perpage_options}}
+                    <option value="{{value}}" {{#selected}}selected{{/selected}}>{{value}}</option>
+                    {{/perpage_options}}
+                </select>
+            </form>
+
+            {{#requestspagination}}
+            {{{requestspagination}}}
+            {{/requestspagination}}
+        </div>
+    </div>
+</div>

@@ -1,0 +1,346 @@
+<table class="custom-table" id="annaulplan-approved-courses-table">
+    <tr>
+        <th>{{#str}}annualplantitle, local_annualplans{{/str}}</th>
+        <th>{{#str}}courseid, local_annualplans{{/str}}</th>
+        <th>{{#str}}coursename, local_annualplans{{/str}}</th>
+        <th>{{#str}}modules, local_annualplans{{/str}}</th>
+        <th>{{#str}}category, local_annualplans{{/str}}</th>
+        <th>{{#str}}startdate, local_annualplans{{/str}}</th>
+        <th>{{#str}}enddate, local_annualplans{{/str}}</th>
+        <th>{{#str}}duration, local_annualplans{{/str}}</th>
+        <th>{{#str}}numberofbeneficiaries, local_annualplans{{/str}}</th>
+        <th>{{#str}}status, local_annualplans{{/str}}</th>
+        <th>{{#str}}level, local_annualplans{{/str}}</th>
+        <th>{{#str}}place, local_annualplans{{/str}}</th>
+        <th></th>
+
+    </tr>
+    {{#courses}}
+    {{#is_added_course}}
+    <tr>
+        <td>{{annualplantitle}}</td>
+        <td>{{courseid}}</td>
+        <td>{{coursename}}</td>
+        <td>
+            {{#modules}}
+                {{#modules_list}}
+                    <div class="module-item">{{.}}</div>
+                {{/modules_list}}
+            {{/modules}}
+            {{^modules}}
+                <span class="no-modules">{{#str}}didntaddedyet, local_annualplans{{/str}}</span>
+            {{/modules}}
+        </td>
+        <td>
+        {{category}}
+        </td>
+        <td>{{startdate}}</td>
+        <td>{{enddate}}</td>
+        <td>{{duration}}</td>
+        <td>{{numberofbeneficiaries}}</td>
+        <td>{{status}}</td>
+        <td>
+            <form method="post" action="">
+                <input type="hidden" name="formaction" value="update_level">
+                <input type="hidden" name="courseid" value="{{courseid}}">
+                <input type="hidden" name="coursedate" value="{{coursedate}}">
+                <input type="hidden" name="sesskey" value="{{sesskey}}">
+                <input type="hidden" name="courselevelid" value="{{selected_level_id}}">
+                <span id="courselevelid_{{courseid}}">
+                    {{#selected_level_name}}
+                        {{selected_level_name}}
+                    {{/selected_level_name}}
+                    {{^selected_level_name}}
+                        لا يوجد تصنيف
+                    {{/selected_level_name}}
+                </span>
+            </form>
+        </td>
+        <td>{{place}}</td>
+       <td>
+            <a href="{{{config.wwwroot}}}/course/view.php?id={{id}}" class="icon-button text-primary" title="{{#str}}view{{/str}}">
+                <i class="fa fa-eye" aria-hidden="true"></i>
+                <span class="sr-only">{{#str}}view{{/str}}</span>
+            </a>
+        </td>
+    </tr>
+    {{/is_added_course}}
+    {{/courses}}
+</table>
+
+<!-- Include Necessary Libraries -->
+<script src="{{config.wwwroot}}/local/annualplans/js/xlsx.full.min.js"></script>
+<script src="{{config.wwwroot}}/local/annualplans/js/jspdf.umd.min.js"></script>
+<script src="{{config.wwwroot}}/local/annualplans/js/html2canvas.min.js"></script>
+
+<!-- Add the Download CSV Button at the Bottom of the Table -->
+<div class="download-button-container">
+    <button id="download-button">تنزيل الجدول</button>
+    <div id="download-menu" class="download-menu">
+        <a href="#" data-type="csv">صيغة CSV</a>
+        <a href="#" data-type="excel">صيغة Excel</a>
+    </div>
+</div>
+
+
+<script>
+//paginations
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialize pagination
+        var table = document.getElementById('annaulplan-approved-courses-table');
+        var tbody = table.querySelector('tbody');
+        var rows = tbody ? tbody.querySelectorAll('tr') : table.querySelectorAll('tr:not(:first-child)');
+        var rowsPerPage = 20; // Number of rows per page
+        var currentPage = 1;
+        var totalPages = Math.ceil(rows.length / rowsPerPage);
+
+        function displayRows() {
+            var start = (currentPage - 1) * rowsPerPage;
+            var end = start + rowsPerPage;
+            for (var i = 0; i < rows.length; i++) {
+                if (i >= start && i < end) {
+                    rows[i].style.display = '';
+                } else {
+                    rows[i].style.display = 'none';
+                }
+            }
+        }
+
+        function setupPagination() {
+            var paginationContainer = document.getElementById('pagination');
+            if (!paginationContainer) {
+                paginationContainer = document.createElement('div');
+                paginationContainer.id = 'pagination';
+                table.parentNode.insertBefore(paginationContainer, table.nextSibling);
+            }
+            paginationContainer.innerHTML = '';
+
+            // Previous Button
+            var prevButton = document.createElement('button');
+            prevButton.textContent = 'السابق';
+            prevButton.disabled = currentPage === 1;
+            prevButton.addEventListener('click', function() {
+                if (currentPage > 1) {
+                    currentPage--;
+                    displayRows();
+                    setupPagination();
+                    scrollToTop();
+                }
+            });
+            paginationContainer.appendChild(prevButton);
+
+            // Page Numbers
+            for (var i = 1; i <= totalPages; i++) {
+                var pageButton = document.createElement('button');
+                pageButton.textContent = i;
+                if (i === currentPage) {
+                    pageButton.disabled = true;
+                }
+                (function(page) {
+                    pageButton.addEventListener('click', function() {
+                        currentPage = page;
+                        displayRows();
+                        setupPagination();
+                        scrollToTop();
+                    });
+                })(i);
+                paginationContainer.appendChild(pageButton);
+            }
+
+            // Next Button
+            var nextButton = document.createElement('button');
+            nextButton.textContent = 'التالي';
+            nextButton.disabled = currentPage === totalPages;
+            nextButton.addEventListener('click', function() {
+                if (currentPage < totalPages) {
+                    currentPage++;
+                    displayRows();
+                    setupPagination();
+                    scrollToTop();
+                }
+            });
+            paginationContainer.appendChild(nextButton);
+        }
+
+        // Function to scroll to the top of the page
+        function scrollToTop() {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // Initialize the table
+        displayRows();
+        setupPagination();
+    });
+
+
+// Toggle the dropdown menu
+document.getElementById('download-button').addEventListener('click', function() {
+    var menu = document.getElementById('download-menu');
+    menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
+});
+
+// Close the dropdown if clicked outside
+window.onclick = function(event) {
+    if (!event.target.matches('#download-button')) {
+        var menu = document.getElementById('download-menu');
+        if (menu.style.display === 'block') {
+            menu.style.display = 'none';
+        }
+    }
+};
+
+// Function to escape CSV values
+function csvEscape(text) {
+    if (text.includes('"') || text.includes(',') || text.includes('\n')) {
+        text = text.replace(/"/g, '""'); // Escape double quotes by doubling them
+        text = '"' + text + '"';
+    }
+    return text;
+}
+
+// Function to get table data
+function getTableData() {
+    var table = document.getElementById('annaulplan-approved-courses-table');
+    var data = [];
+    var rows = table.querySelectorAll('tr');
+
+    // Loop through each row
+    for (var i = 0; i < rows.length; i++) {
+        var row = [], cols;
+
+        // For headers, use 'th', for data rows, use 'td'
+        if (i == 0) {
+            cols = rows[i].querySelectorAll('th');
+        } else {
+            cols = rows[i].querySelectorAll('td');
+        }
+
+        // Loop through each column
+        for (var j = 0; j < cols.length; j++) {
+            var cell = cols[j];
+            var text = '';
+
+            // Handle cells differently based on their content
+            // If cell contains a select element
+            var select = cell.querySelector('select');
+            if (select) {
+                text = select.options[select.selectedIndex].text.trim();
+            } else {
+                // If cell contains a checkbox
+                var checkbox = cell.querySelector('a[class="icon-button"]');
+                if (checkbox) {
+                    text = "";
+                } else {
+                    // If cell contains plain text or other elements
+                    text = cell.innerText.trim();
+                }
+            }
+
+            // Clean the text
+            text = text.replace(/(\r\n|\n|\r)/gm, " ").trim();
+
+            // For CSV, escape the text
+            text = csvEscape(text);
+
+            row.push(text);
+        }
+
+        data.push(row);
+    }
+
+    return data;
+}
+
+// Function to download CSV
+function downloadCSV() {
+    var data = getTableData();
+    var csvContent = data.map(e => e.join(",")).join("\n");
+
+    var blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    var link = document.createElement("a");
+    if (link.download !== undefined) {
+        var url = URL.createObjectURL(blob);
+        link.setAttribute("href", url);
+        link.setAttribute("download", "جدول الدورات.csv");
+        link.style.visibility = 'hidden';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    } else {
+        alert('Your browser does not support downloading files via JavaScript. Please update your browser.');
+    }
+}
+
+// Function to download Excel
+function downloadExcel() {
+    var data = getTableData();
+    // Remove CSV escaping for Excel
+    data = data.map(row => row.map(cell => cell.replace(/^"|"$/g, '').replace(/""/g, '"')));
+    /* Convert data array to worksheet */
+    var ws = XLSX.utils.aoa_to_sheet(data);
+    var wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Sheet1");
+
+    /* Generate Excel file and trigger download */
+    XLSX.writeFile(wb, 'جدول الدورات.xlsx');
+}
+
+// Function to download PDF
+function downloadPDF() {
+    var doc = new jspdf.jsPDF('p', 'pt', 'a4');
+    var elementHTML = document.getElementById('annaulplan-approved-courses-table');
+    doc.html(elementHTML, {
+        callback: function(doc) {
+            doc.save('table_data.pdf');
+        },
+        x: 10,
+        y: 10,
+        html2canvas: { scale: 0.5 }
+    });
+}
+
+// Event listener for download menu
+document.getElementById('download-menu').addEventListener('click', function(event) {
+    event.preventDefault();
+    var downloadType = event.target.getAttribute('data-type');
+
+    if (downloadType === 'csv') {
+        downloadCSV();
+    } else if (downloadType === 'excel') {
+        downloadExcel();
+    } else if (downloadType === 'pdf') {
+        downloadPDF();
+    }
+});
+
+</script>
+
+<style>
+/* Sections column styling */
+.module-item {
+    display: block;
+    background-color: #e9ecef;
+    border: 1px solid #ced4da;
+    border-radius: 3px;
+    padding: 3px 8px;
+    margin: 2px 0;
+    font-size: 12px;
+    color: #495057;
+    text-align: center;
+}
+
+.no-modules {
+    font-style: italic;
+    color: #6c757d;
+    font-size: 12px;
+}
+
+/* Make sections column wider - it's the 4th column (sections column remains in same position) */
+#annaulplan-approved-courses-table th:nth-child(4),
+#annaulplan-approved-courses-table td:nth-child(4) {
+    min-width: 150px;
+    max-width: 200px;
+    word-wrap: break-word;
+    vertical-align: top;
+}
+</style>

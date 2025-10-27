@@ -1,0 +1,39 @@
+<div class="table-container">
+    <table class="custom-table participant-request">
+        <thead>
+            <tr>
+                <th>{{#str}}participant, local_requestservices{{/str}}</th>
+                <th>{{#str}}pfnumber, local_requestservices{{/str}}</th>
+                <th>{{#str}}course{{/str}}</th>
+                <th>{{#str}}plan, local_requestservices{{/str}}</th>
+                <th>{{#str}}participanttype, local_requestservices{{/str}}</th>
+                <th>{{#str}}organization, local_requestservices{{/str}}</th>
+                <th>{{#str}}internal, local_requestservices{{/str}}</th>
+                <th>{{#str}}requestdate, local_requestservices{{/str}}</th>
+                <th>{{#str}}contractduration, local_requestservices{{/str}}</th>
+                <th>{{#str}}contractcost, local_requestservices{{/str}}</th>
+                <th>{{#str}}status{{/str}}</th>
+            </tr>
+        </thead>
+        <tbody>
+            {{#requests}}
+            <tr>
+                <td>{{participant_name}}</td>
+                <td>{{pf_number}}</td>
+                <td>{{course_name}}</td>
+                <td>{{plan_name}}</td>
+                <td>{{type_name}}</td>
+                <td>{{org_name}}</td>
+                <td>{{is_inside}}</td>
+                <td>{{date}}</td>
+                <td>{{duration_amount}} {{#str}}days, local_requestservices{{/str}}</td>
+                <td>{{compensation_amount}} {{#str}}currency, local_requestservices{{/str}}</td>
+                <td>
+                    <span class="status status-{{status}}">{{status_name}}</span>
+                </td>
+            </tr>
+            {{/requests}}
+        </tbody>
+    </table>
+
+</div>

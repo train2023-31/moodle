@@ -1,0 +1,101 @@
+<div class="modal" id="resident-lecturer-modal" style="display: none;">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">{{str.addresidentlecturermodal}}</h5>
+                <button type="button" class="close" id="close-resident-lecturer-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="resident-lecturer-form">
+                    <input type="hidden" id="resident-id" name="id" value="">
+                    <input type="hidden" id="resident-lecturer-type" name="lecturer_type" value="resident">
+
+                    <!-- Search Section -->
+                    <div class="mb-3 p-3" style="background-color: #f8f9fa; border-radius: 5px; border-left: 4px solid #007cba;">
+                        <h6 class="mb-2" style="color: #007cba; font-weight: 600;">{{str.civilnumbersearch}}</h6>
+                        <input type="text" id="resident-civil-search" class="form-control" 
+                               placeholder="{{str.civilnumberplaceholder}}" autocomplete="off">
+                        <small class="form-text text-muted mt-1">{{str.civilnumberhelp}}</small>
+                        <div id="resident-civil-loading" style="display: none;" class="mt-2">
+                            <small class="text-info"><i class="fa fa-spinner fa-spin"></i> {{str.searchingdata}}</small>
+                        </div>
+                    </div>
+
+                    <!-- Auto-filled Information -->
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="resident-name">{{str.name}} *</label>
+                                <input type="text" id="resident-name" name="name" class="form-control" required readonly>
+                                <small class="form-text text-muted">{{str.namefrompracle}}</small>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="resident-civil-number">{{str.civilnumber}}</label>
+                                <input type="text" id="resident-civil-number" name="civil_number" class="form-control" readonly>
+                                <small class="form-text text-muted">{{str.civilnumberfrompracle}}</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="resident-nationality">{{str.nationality}}</label>
+                                <input type="text" id="resident-nationality" name="nationality" class="form-control" readonly>
+                                <small class="form-text text-muted">{{str.nationalityfrompracle}}</small>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="resident-age">{{str.age}} *</label>
+                                <input type="number" id="resident-age" name="age" class="form-control" min="18" max="99"
+                                       title="{{str.agevalidation}}" required>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Professional Information -->
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="resident-specialization">{{str.specialization}} *</label>
+                                <input type="text" id="resident-specialization" name="specialization" class="form-control" minlength="2" maxlength="100"
+                                       pattern="[A-Za-z\u0600-\u06FF\s]+" title="{{str.specializationvalidation}}" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="resident-degree">{{str.degree}} *</label>
+                                <input type="text" id="resident-degree" name="degree" class="form-control" minlength="2" maxlength="100"
+                                       pattern="[A-Za-z\u0600-\u06FF\s]+" title="{{str.degreevalidation}}" required>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="resident-organization">{{str.organization}} *</label>
+                                <input type="text" id="resident-organization" name="organization" class="form-control" minlength="2" maxlength="100"
+                                       pattern="[A-Za-z\u0600-\u06FF0-9\s]+" title="{{str.organizationvalidation}}" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="resident-passport">{{str.passport}} *</label>
+                                <input type="text" id="resident-passport" name="passport" class="form-control" required readonly>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" id="save-resident-lecturer">{{str.save}}</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+

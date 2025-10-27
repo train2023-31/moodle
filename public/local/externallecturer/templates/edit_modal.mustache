@@ -1,0 +1,43 @@
+<div class="modal" id="edit-lecturer-modal" style="display: none;">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">{{str.editlecturermodal}}</h5>
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="edit-lecturer-form">
+                    <div class="form-group">
+                        <label for="edit-name">{{str.name}}</label>
+                        <input type="text" id="edit-name" name="name" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-age">{{str.age}}</label>
+                        <input type="number" id="edit-age" name="age" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-specialization">{{str.specialization}}</label>
+                        <input type="text" id="edit-specialization" name="specialization" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-university">{{str.university}}</label>
+                        <input type="text" id="edit-university" name="university" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-degree">{{str.degree}}</label>
+                        <input type="text" id="edit-degree" name="degree" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-passport">{{str.passport}}</label>
+                        <input type="text" id="edit-passport" name="passport" class="form-control" required>
+                    </div>
+                    <input type="hidden" id="edit-lecturer-id">
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" id="save-edits">{{str.savechanges}}</button>
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">{{str.cancel}}</button>
+            </div>
+        </div>
+    </div>
+</div>

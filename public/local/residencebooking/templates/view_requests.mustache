@@ -1,0 +1,211 @@
+<!-- ======================================================================
+   FILTER FORM  - unchanged
+======================================================================== -->
+{{#filter}}
+<form class="filter-form" method="get" action="{{form_action}}" id="filter-form">
+    <input type="hidden" name="tab" value="manage">
+
+    <!-- Course -->
+    <div class="form-group">
+        <label for="course_name_filter">{{#str}}course_name, local_residencebooking{{/str}}</label>
+        <select name="course_id" id="course_name_filter">
+            <option value="">{{#str}}all, local_residencebooking{{/str}}</option>
+            {{#courses}}
+                <option value="{{id}}" {{#selected}}selected{{/selected}}>{{fullname}}</option>
+            {{/courses}}
+        </select>
+    </div>
+
+    <!-- Status -->
+    <div class="form-group">
+        <label for="status_filter">{{#str}}filterbystatus, local_residencebooking{{/str}}</label>
+        <select name="status" id="status_filter">
+            <option value="0">{{#str}}all, local_residencebooking{{/str}}</option>
+            {{#statuses}}
+                <option value="{{id}}" {{#selected}}selected{{/selected}}>{{name}}</option>
+            {{/statuses}}
+        </select>
+    </div>
+
+    <!-- Residence type -->
+    <div class="form-group">
+        <label for="residence_type_filter">{{#str}}filterbytype, local_residencebooking{{/str}}</label>
+        <select name="residence_type" id="residence_type_filter">
+            <option value="0">{{#str}}all, local_residencebooking{{/str}}</option>
+            {{#types}}
+                <option value="{{id}}" {{#selected}}selected{{/selected}}>{{name}}</option>
+            {{/types}}
+        </select>
+    </div>
+
+    <!-- Purpose -->
+    <div class="form-group">
+        <label for="purpose_filter">{{#str}}filterbypurpose, local_residencebooking{{/str}}</label>
+        <select name="purpose" id="purpose_filter">
+            <option value="0">{{#str}}all, local_residencebooking{{/str}}</option>
+            {{#purposes}}
+                <option value="{{id}}" {{#selected}}selected{{/selected}}>{{name}}</option>
+            {{/purposes}}
+        </select>
+    </div>
+
+    <!-- Guest name -->
+    <div class="form-group">
+        <label for="guest_name_filter">{{#str}}filterbyguestname, local_residencebooking{{/str}}</label>
+        <input type="text" name="guest_name" id="guest_name_filter" value="{{guest_name_filter}}">
+    </div>
+
+    <!-- Service number -->
+    <div class="form-group">
+        <label for="service_number_filter">{{#str}}filterbyservicenumber, local_residencebooking{{/str}}</label>
+        <input type="text" name="service_number" id="service_number_filter" value="{{service_number_filter}}">
+    </div>
+
+    <!-- Start date -->
+    <div class="form-group">
+        <label for="start_date_filter">{{#str}}filterbystartdate, local_residencebooking{{/str}}</label>
+        <input type="date" name="start_date" id="start_date_filter" value="{{start_date_filter}}">
+    </div>
+
+    <!-- End date -->
+    <div class="form-group">
+        <label for="end_date_filter">{{#str}}filterbyenddate, local_residencebooking{{/str}}</label>
+        <input type="date" name="end_date" id="end_date_filter" value="{{end_date_filter}}">
+    </div>
+
+    <button type="submit" class="btn btn-primary"><i class="fa fa-search"></i>&nbsp;&nbsp; {{#str}}filter, local_residencebooking{{/str}}</button>
+    <button type="button" class="btn btn-secondary clear-btn" onclick="clearFilters()">{{#str}}clearfilters, local_residencebooking{{/str}}</button>
+</form>
+
+<script>
+function clearFilters() {
+    // Clear all form inputs
+    document.getElementById('filter-form').reset();
+    
+    // Redirect to clean manage tab URL
+    window.location.href = '{{filter_url}}';
+}
+</script>
+{{/filter}}
+
+{{! ======================================================================
+   REQUESTS TABLE
+========================================================================}}
+<style>
+.custom-table thead th {
+    background-color:rgb(78, 109, 143) !important;
+    color: #ffffff !important;
+    font-weight: bold;
+    border: 1px solid #34495e;
+    padding: 12px 8px;
+}
+.custom-table thead th:hover {
+    background-color: #34495e !important;
+}
+</style>
+<table class="custom-table" dir="rtl" style="text-align: right;">
+    <button class="export-csv btn btn-outline-info">
+        CSV <i class="fas fa-download"></i>
+    </button>
+
+    <thead>
+        <tr>
+            <th style="text-align: right;">{{#str}}course_name, local_residencebooking{{/str}}</th>
+            <th style="text-align: right;">{{#str}}guest_name, local_residencebooking{{/str}}</th>
+            <th style="text-align: right;">{{#str}}service_number, local_residencebooking{{/str}}</th>
+            <th style="text-align: right;">{{#str}}residence_type, local_residencebooking{{/str}}</th>
+            <th style="text-align: right;">{{#str}}start_date, local_residencebooking{{/str}}</th>
+            <th style="text-align: right;">{{#str}}end_date, local_residencebooking{{/str}}</th>
+            <th style="text-align: right;">{{#str}}purpose, local_residencebooking{{/str}}</th>
+            <th style="text-align: right;">{{#str}}status, local_residencebooking{{/str}}</th>
+            <th style="text-align: right;">{{#str}}actions, local_residencebooking{{/str}}</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        {{#requests}}
+        <tr>
+            <td style="text-align: right;">{{course_name}}</td>
+            <td style="text-align: right;">{{guest_name}}</td>
+            <td style="text-align: right;">{{service_number}}</td>
+            <td style="text-align: right;">{{residence_type}}</td>
+            <td style="text-align: right;">{{start_date}}</td>
+            <td style="text-align: right;">{{end_date}}</td>
+            <td style="text-align: right;">{{purpose}}</td>
+
+            {{! ───────── Status + rejection reason ───────── }}
+            <td style="text-align: right;">
+                {{status_label}}
+                {{#rejection_note}}
+                    <br>
+                    <small class="text-danger">
+                        {{#str}}rejection_reason, local_residencebooking{{/str}} {{rejection_note}}
+                    </small>
+                {{/rejection_note}}
+            </td>
+
+            {{! ───────── Actions ───────── }}
+            <td style="text-align: right;">
+                {{^status_final}}
+                    {{#can_approve}}
+                    <form method="post" action="{{approve_url}}" style="display:inline;"
+                          onsubmit="event.preventDefault();
+                                    showModal('{{#str}}confirm_title, local_residencebooking{{/str}}',
+                                              '{{#str}}confirm_approve_question, local_residencebooking{{/str}}',
+                                              () => this.submit())">
+                        <input type="hidden" name="id"      value="{{id}}">
+                        <input type="hidden" name="action"  value="approve">
+                        <input type="hidden" name="sesskey" value="{{sesskey}}">
+                        <button type="submit" class="btn btn-link">
+                            {{#str}}approve, local_residencebooking{{/str}}
+                        </button>
+                    </form>
+                    {{/can_approve}}
+
+                    {{#can_reject}}
+                    <form id="reject-form-{{id}}" method="post" action="{{reject_url}}" style="display:inline;"
+                          onsubmit='event.preventDefault(); showModal("{{#str}}confirm_title, local_residencebooking{{/str}}",
+                                                                  "{{#str}}confirm_reject_question, local_residencebooking{{/str}}",
+                                                                  (note) => {
+                                                                      this.querySelector("input[name=\"rejection_note\"]").value = note;
+                                                                      this.submit();
+                                                                  }, true)'>
+                        <input type="hidden" name="id"      value="{{id}}">
+                        <input type="hidden" name="action"  value="reject">
+                        <input type="hidden" name="sesskey" value="{{sesskey}}">
+                        <input type="hidden" name="rejection_note" value="">
+                        <button type="submit" class="btn btn-link text-danger">
+                            {{#str}}reject, local_residencebooking{{/str}}
+                        </button>
+                    </form>
+                    {{/can_reject}}
+                {{/status_final}}
+
+                {{#status_final}}
+                    <span class="text-muted">—</span>
+                {{/status_final}}
+            </td>
+        </tr>
+        {{/requests}}
+    </tbody>
+</table>
+
+{{! ======================================================================
+   PAGINATION
+========================================================================}}
+{{#pagination}}
+<nav class="paging">
+    <ul class="pagination">
+        {{#previous}}
+        <li class="page-item">
+            <a class="page-link" href="{{previous}}">{{#str}}previous{{/str}}</a>
+        </li>
+        {{/previous}}
+        {{#next}}
+        <li class="page-item">
+            <a class="page-link" href="{{next}}">{{#str}}next{{/str}}</a>
+        </li>
+        {{/next}}
+    </ul>
+</nav>
+{{/pagination}}

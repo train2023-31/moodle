@@ -1,0 +1,137 @@
+ <!-- <h2>{{str.pluginname}}</h2> -->
+
+<!-- Styles to ensure uniform button appearance across the interface -->
+<style>
+.custom-table thead th {
+    background-color:rgb(78, 109, 143) !important;
+    color: #ffffff !important;
+    font-weight: bold;
+    border: 1px solid #34495e;
+    padding: 12px 8px;
+}
+.custom-table thead th:hover {
+    background-color: #34495e !important;
+}
+
+.uniform-button {
+    min-width: 180px !important;
+    height: 38px !important;
+    margin-right: 10px !important;
+    font-size: 14px !important;
+    padding: 8px 16px !important;
+    display: inline-block !important;
+    text-align: center !important;
+    vertical-align: middle !important;
+    white-space: nowrap !important;
+}
+
+/* Show the lecturers container by default since it's the only tab */
+#lecturers-container {
+    display: block !important;
+}
+</style>
+
+<!-- 
+    TAB NAVIGATION SYSTEM
+    =====================
+    To add a new tab:
+    1. Add a new button here with onclick="openTab(event, 'new-tab-container')"
+    2. Add the corresponding tab content div below with id="new-tab-container" class="tab-content"
+    3. Update the JavaScript openTab function if needed
+    4. Add any required language strings to the PHP data array
+    5. Add any required data processing in the PHP file
+-->
+<!--<div class="tab">
+    <button class="tablinks" onclick="openTab(event, 'lecturers-container')" id="defaultOpen">{{str.lecturers}}</button>
+     
+        Example of adding a new tab:
+        <button class="tablinks" onclick="openTab(event, 'new-feature-container')" id="new-feature-tab">{{str.newfeature}}</button>
+    -->
+<!-- </div>-->
+
+<!-- Lecturer Table -->
+<div id="lecturers-container" class="tab-content">
+    <button id="add-lecturer" class="btn btn-primary uniform-button">{{str.addlecturerbutton}}</button>
+    <button id="add-resident-lecturer" class="btn btn-primary uniform-button">{{str.addresidentlecturerbutton}}</button>
+    <br>
+    <button class="export-csv btn btn-outline-info">{{str.exportcsv}} <i class="fas fa-download"></i></button>
+
+    <table class="custom-table">
+        <thead>
+            <tr>
+                <th>{{str.name}}</th>
+                <th>{{str.age}}</th>
+                <th>{{str.specialization}}</th>
+                <th>{{str.organization}}</th>
+                <th>{{str.degree}}</th>
+                <th>{{str.passport}}</th>
+                <th>{{str.nationality}}</th>
+                <th>{{str.coursescount}}</th>
+                <th>{{str.createdby}}</th>
+                <th>{{str.modifieddatetime}}</th>
+                <th>{{str.actions}}</th>
+            </tr>
+        </thead>
+        <tbody>
+            {{#lecturers}}
+            <tr class="lecturer-row" data-name={{name}}>
+                <td>{{name}}</td>
+                <td>{{age}}</td>
+                <td>{{specialization}}</td>
+                <td>{{organization}}</td>
+                <td>{{degree}}</td>
+                <td>{{passport}}</td>
+                <td>{{nationality}}</td>
+                <td>{{courses_count}}</td>
+                <td>{{created_by}}</td>
+                <td>{{modified_datetime}}</td>
+                <td class="actions">
+                    <!-- Edit Button -->
+                    <button class="edit-lecturer-button {{#courses_count}}disabled{{/courses_count}}" {{#courses_count}}disabled{{/courses_count}} data-id="{{id}}" data-name="{{name}}" data-age="{{age}}" data-specialization="{{specialization}}" data-organization="{{organization}}" data-degree="{{degree}}" data-passport="{{passport}}" data-civil-number="{{civil_number}}" data-nationality="{{nationality}}" data-lecturer-type="{{lecturer_type}}">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                    <!-- Delete Button -->
+                    <button onclick="event.stopPropagation(); showModal('{{str.confirmation}}', '{{str.confirmdeletelecturer}}', () => deleteHandler('actions/deletelecturer.php', {id: {{id}}}))" class="delete-lecturer-button {{#courses_count}}disabled{{/courses_count}}" {{#courses_count}}disabled{{/courses_count}}>
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </td>
+            </tr>
+            {{/lecturers}}
+            {{^lecturers}}
+            <tr><td colspan="11">{{str.nolecturers}}</td></tr>
+            {{/lecturers}}
+        </tbody>
+    </table>
+    
+    <!-- Flex container for total rows, pagination, and per page form -->
+    <div class="custom-table-controls">
+        <div class="total-rows">
+            <span class="alt-text">{{str.total}}</span> {{totallecturers}}
+        </div>
+
+        <!-- Pagination and per page form -->
+        <div class="pagination-controls">
+            <form method="get" id="perpage-form" class="perpage-form">
+                <label for="perpage" class="alt-text">{{str.recordsperpage}}</label>
+                <select class="custom-select" name="perpage" id="perpage" onchange="document.getElementById('perpage-form').submit();">
+                    {{#perpage_options}}
+                    <option value="{{value}}" {{#selected}}selected{{/selected}}>{{value}}</option>
+                    {{/perpage_options}}
+                </select>
+            </form>
+
+            <!-- Render pagination -->
+            {{#lecturerspagination}}
+            {{{lecturerspagination}}}
+            {{/lecturerspagination}}
+        </div>
+    </div>
+</div>
+
+
+
+{{> local_externallecturer/form_externallecturer }}
+
+{{> local_externallecturer/edit_modal }}
+
+{{> local_externallecturer/form_residentlecturer }}

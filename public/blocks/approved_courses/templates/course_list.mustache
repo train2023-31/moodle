@@ -1,0 +1,113 @@
+{{#hascourses}}
+<div class="block-approved-courses">
+    <div class="courses-header">
+        <h4>{{#str}}approvedcourses, block_approved_courses{{/str}} ({{plan_year}})</h4>
+        <small class="text-muted">{{#str}}totalcourses, block_approved_courses{{/str}}: {{course_count}}</small>
+    </div>
+    
+    <div class="courses-list">
+        {{#courses}}
+        <div class="course-item">
+            <div class="course-info">
+                <a href="{{course_url}}" class="course-link" title="{{fullname}}">
+                    {{display_name}}
+                </a>
+                {{#course_code}}
+                <div class="course-code">
+                    <span class="badge badge-info">{{course_code}}</span>
+                </div>
+                {{/course_code}}
+            </div>
+            {{#annual_plan_title}}
+            <div class="plan-info">
+                <small class="text-muted">{{#str}}fromplan, block_approved_courses{{/str}}: {{annual_plan_title}}</small>
+            </div>
+            {{/annual_plan_title}}
+        </div>
+        {{/courses}}
+    </div>
+    
+    {{#course_count}}
+    {{#course_count_more_than_10}}
+    <div class="courses-footer">
+        <small class="text-muted">
+            {{#str}}showingfirst, block_approved_courses{{/str}} 10 {{#str}}of, block_approved_courses{{/str}} {{course_count}} {{#str}}courses, block_approved_courses{{/str}}
+        </small>
+    </div>
+    {{/course_count_more_than_10}}
+    {{/course_count}}
+</div>
+
+<style>
+.block-approved-courses {
+    font-size: 0.9em;
+}
+
+.block-approved-courses .courses-header {
+    margin-bottom: 10px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.block-approved-courses .courses-header h4 {
+    margin: 0 0 5px 0;
+    font-size: 1.1em;
+    color: #495057;
+}
+
+.block-approved-courses .courses-list {
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.block-approved-courses .course-item {
+    padding: 8px 0;
+    border-bottom: 1px solid #f8f9fa;
+}
+
+.block-approved-courses .course-item:last-child {
+    border-bottom: none;
+}
+
+.block-approved-courses .course-link {
+    display: block;
+    color: #007bff;
+    text-decoration: none;
+    font-weight: 500;
+    margin-bottom: 4px;
+}
+
+.block-approved-courses .course-link:hover {
+    color: #0056b3;
+    text-decoration: underline;
+}
+
+.block-approved-courses .course-code {
+    margin-top: 4px;
+}
+
+.block-approved-courses .course-code .badge {
+    font-size: 0.75em;
+    padding: 2px 6px;
+}
+
+.block-approved-courses .plan-info {
+    margin-top: 4px;
+}
+
+.block-approved-courses .courses-footer {
+    margin-top: 10px;
+    padding-top: 8px;
+    border-top: 1px solid #e9ecef;
+    text-align: center;
+}
+</style>
+{{/hascourses}}
+
+{{^hascourses}}
+<div class="block-approved-courses">
+    <div class="no-courses-message">
+        <p class="text-muted">{{#str}}nocoursesavailable, block_approved_courses{{/str}}</p>
+    </div>
+</div>
+{{/hascourses}}

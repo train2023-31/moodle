@@ -1,0 +1,189 @@
+{{#filter}}
+<form class="filter-form" method="get" action="{{form_action}}" id="filter-form" dir="rtl">
+    <input type="hidden" name="tab" value="managebookings">
+
+    <!-- Course -->
+    <div class="form-group">
+        <label for="course_name_filter">{{#str}}course, local_roombooking{{/str}}</label>
+        <select name="courseid" id="course_name_filter">
+            <option value="0">{{#str}}any, local_roombooking{{/str}}</option>
+            {{#courses}}
+                <option value="{{id}}" {{#selected}}selected{{/selected}}>{{fullname}}</option>
+            {{/courses}}
+        </select>
+    </div>
+
+    <!-- Room -->
+    <div class="form-group">
+        <label for="room_filter">{{#str}}room, local_roombooking{{/str}}</label>
+        <select name="roomid" id="room_filter">
+            <option value="0">{{#str}}any, local_roombooking{{/str}}</option>
+            {{#rooms}}
+                <option value="{{id}}" {{#selected}}selected{{/selected}}>{{name}}</option>
+            {{/rooms}}
+        </select>
+    </div>
+
+        <button type="submit" class="btn btn-primary"><i class="fa fa-search">&nbsp;&nbsp;</i> {{#str}}filter, local_roombooking{{/str}}</button>
+        <button type="button" class="btn btn-secondary" onclick="clearFilters()">{{#str}}clearfilters, local_roombooking{{/str}}</button>
+
+</form>
+<script>
+function clearFilters() {
+    document.getElementById('filter-form').reset();
+    window.location.href = '{{filter_url}}';
+}
+</script>
+
+{{/filter}}
+
+
+
+<div class="table-container">
+    <!-- Notification Area -->
+    <div id="notification-area" aria-live="polite"></div>
+
+    <!-- Export CSV Button placed outside the table for better semantics -->
+    <button class="export-csv btn btn-outline-info" id="export-csv-btn" aria-label="{{#str}} exportcsv, local_roombooking {{/str}}">
+        {{#str}} exportcsv, local_roombooking {{/str}} <i class="fas fa-download"></i>
+    </button>
+<style>
+.custom-table thead th {
+    background-color:rgb(78, 109, 143) !important;
+    color: #ffffff !important;
+    font-weight: bold;
+    border: 1px solid #34495e;
+    padding: 12px 8px;
+}
+.custom-table thead th:hover {
+    background-color: #34495e !important;
+}
+</style>
+    <table class="custom-table">
+        <thead>
+            <tr>
+                <th>{{column_course}}</th>
+                <th>{{column_room}}</th>
+                <th>{{column_capacity}}</th>
+                <th>{{column_start_date}}</th>
+                <th>{{column_start_time}}</th>
+                <th>{{column_end_time}}</th>
+                <th>{{column_recurrence}}</th>
+                <th>{{column_user}}</th>
+                <th>{{column_status}}</th>
+                <th>{{actions_label}}</th>
+            </tr>
+        </thead>
+        <tbody>
+            {{#records}}
+            <tr id="row_{{id}}">
+                <td>{{course_name}}</td>
+                <td>{{room_name}}</td>
+                <td>{{capacity}}</td>
+                <td>{{start_date}}</td>
+                <td>{{start_time}}</td>
+                <td>{{end_time}}</td>
+                <td>{{recurrence_label}}</td>
+                <td>{{fullname}}</td>
+                <td class="status-cell">
+                    <!-- Workflow status -->
+                    <span class="{{#status_is_approved}}text-success{{/status_is_approved}}{{#status_is_initial}}text-warning{{/status_is_initial}}{{#status_is_rejected}}text-danger{{/status_is_rejected}}">
+                        {{status_name}}
+                    </span>
+
+                    <!-- ►CHANGE 1: show REJECTION note only in rejected state -->
+                    {{#status_is_rejected}}
+                        {{#rejection_note}}
+                        <div class="text-danger small">
+                            <strong>{{#str}}rejection_reason, local_roombooking{{/str}}:</strong> {{rejection_note}}
+                        </div>
+                        {{/rejection_note}}
+                    {{/status_is_rejected}}
+
+                    <!-- ►CHANGE 2: show APPROVAL note only in approved state -->
+                    {{#status_is_approved}}
+                        {{#approval_note}}
+                        <div class="text-success small">
+                            <strong>{{#str}}approval_note, local_roombooking{{/str}}:</strong> {{approval_note}}
+                        </div>
+                        {{/approval_note}}
+                    {{/status_is_approved}}
+                </td>
+
+                <td>
+                    {{#can_manage}}
+                        {{#can_approve}}
+                        <!-- Approve Button -->
+                        <button {{#status_is_approved}}disabled{{/status_is_approved}}{{#status_is_rejected}}disabled{{/status_is_rejected}}
+                                type="button" class="btn btn-link"
+                                onclick="showModal('{{#str}}confirm_title, local_roombooking{{/str}}',
+                                                  '{{#str}}confirm_approve, local_roombooking{{/str}}',
+                                                  () => approveHandler({{id}}))"
+                                aria-label="{{#str}}approve_request, local_roombooking{{/str}}">
+                            {{#str}}approve_request, local_roombooking{{/str}}
+                        </button>
+
+                        <!-- Reject Button -->
+                        <button {{#status_is_approved}}disabled{{/status_is_approved}}{{#status_is_rejected}}disabled{{/status_is_rejected}}
+                                type="button" class="btn btn-link text-danger"
+                                onclick="showModal('{{#str}}confirm_title, local_roombooking{{/str}}',
+                                                  '{{#str}}confirm_reject, local_roombooking{{/str}}',
+                                                  (rejectionNote) => rejectHandler(rejectionNote, {{id}}), true)"
+                                aria-label="{{#str}}reject_request, local_roombooking{{/str}}">
+                            {{#str}}reject_request, local_roombooking{{/str}}
+                        </button>
+                        {{/can_approve}}
+
+                        {{^can_approve}}
+                            {{#status_is_rejected}}
+                                <span class="text-danger">{{#str}}status_rejected, local_roombooking{{/str}}</span>
+                            {{/status_is_rejected}}
+                            {{#status_is_approved}}
+                                <span class="text-success">{{#str}}status_approved, local_roombooking{{/str}}</span>
+                            {{/status_is_approved}}
+                            {{^status_is_rejected}}
+                                {{^status_is_approved}}
+                                    <span class="text-muted">{{#str}}awaiting_approval, local_roombooking{{/str}}</span>
+                                {{/status_is_approved}}
+                            {{/status_is_rejected}}
+                        {{/can_approve}}
+                    {{/can_manage}}
+                </td>
+            </tr>
+            {{/records}}
+        </tbody>
+    </table>
+
+    <script>
+    /* JS handlers unchanged */
+    function approveHandler(requestId) {
+        const actionUrlBase = '{{{ js.action_url_base }}}';
+        const sesskey       = '{{{ js.sesskey }}}';
+
+        fetch(actionUrlBase, {
+            method : 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body   : JSON.stringify({action:'approve', id:requestId, sesskey}),
+            credentials: 'same-origin'
+        })
+        .then(r => r.json())
+        .then(() => location.reload())
+        .catch(console.error);
+    }
+
+    function rejectHandler(rejectionNote, requestId) {
+        const actionUrlBase = '{{{ js.action_url_base }}}';
+        const sesskey       = '{{{ js.sesskey }}}';
+
+        fetch(actionUrlBase, {
+            method : 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body   : JSON.stringify({action:'reject', id:requestId, rejection_note:rejectionNote, sesskey}),
+            credentials: 'same-origin'
+        })
+        .then(r => r.json())
+        .then(() => location.reload())
+        .catch(console.error);
+    }
+    </script>
+</div>

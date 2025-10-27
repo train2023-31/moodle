@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<XMLDB PATH="local/annualplans/db" VERSION="2025081200" COMMENT="XMLDB file for Moodle local/annualplans">
+    <TABLES>
+        <TABLE NAME="local_annual_plan_course" COMMENT="Stores data about annual plans">
+            <FIELDS>
+                <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true" COMMENT="The primary identifier for an annual plan"/>
+                <FIELD NAME="annualplanid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="Foreign key referencing local_annual_plan_table"/>
+                <FIELD NAME="courseid" TYPE="char" LENGTH="100" NOTNULL="true" SEQUENCE="false" COMMENT="Identifier for the associated course"/>
+                <FIELD NAME="coursename" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false" COMMENT="Name of the course associated with the plan"/>
+                <FIELD NAME="category" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false" COMMENT="Category of the course"/>
+                <FIELD NAME="coursedate" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="Date when the course is scheduled, stored as a timestamp"/>
+                <FIELD NAME="numberofbeneficiaries" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="Number of beneficiaries for the plan"/>
+                <FIELD NAME="status" TYPE="char" LENGTH="100" NOTNULL="true" SEQUENCE="false" COMMENT="Current status of the plan"/>
+                <FIELD NAME="approve" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="check if course is approved or not"/>
+                <FIELD NAME="userid" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="User ID of the person who added the course"/>
+                <FIELD NAME="courselevelid" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="Foreign key referencing local_annual_plan_course_level"/>
+                <FIELD NAME="place" TYPE="char" LENGTH="100" NOTNULL="true" SEQUENCE="false" COMMENT="place of the course"/>
+                <FIELD NAME="disabled" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="check if course is deleted or not"/>
+                <FIELD NAME="deletion_note" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="Description of the why course deleted"/>
+                <FIELD NAME="unapprove_note" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="Description of the why course unapproved"/>
+                <FIELD NAME="finance_source" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="finance source code"/>
+                <FIELD NAME="finance_remarks" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="finance notes"/>
+
+
+            </FIELDS>
+            <KEYS>
+                <KEY NAME="primary" TYPE="primary" FIELDS="id" COMMENT="Primary key for the annual plans table"/>
+                <KEY NAME="fk_annualplanid" TYPE="foreign" FIELDS="annualplanid" REFTABLE="local_annual_plan_table" REFFIELDS="id" COMMENT="Foreign key reference to local_annual_plan_table"/>
+                <KEY NAME="fk_courselevelid" TYPE="foreign" FIELDS="courselevelid" REFTABLE="local_annual_plan_course_level" REFFIELDS="id" COMMENT="Foreign key reference to local_annual_plan_course_level"/>
+            </KEYS>
+            <INDEXES>
+                <INDEX NAME="coursename_idx" UNIQUE="false" FIELDS="coursename" COMMENT="Index on the course name for faster queries"/>
+            </INDEXES>
+        </TABLE>
+        <TABLE NAME="local_annual_plan" COMMENT="This table has the list of each annual plan">
+            <FIELDS>
+                <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+                <FIELD NAME="year" TYPE="int" LENGTH="4" NOTNULL="true" SEQUENCE="false" COMMENT="Year associated with the annual plan"/>
+                <FIELD NAME="title" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false" COMMENT="Title of the annual plan"/>
+                <FIELD NAME="date_created" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="Timestamp for when the plan was created"/>
+                <FIELD NAME="status" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false" COMMENT="Current status of the annual plan"/>
+                <FIELD NAME="description" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="Description of the annual plan"/>
+                <FIELD NAME="disabled" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="check if course is deleted or not"/>
+                <FIELD NAME="deletion_note" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="Description of why annual plan deleted"/>
+            </FIELDS>
+            <KEYS>
+                <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+            </KEYS>
+        </TABLE>
+        <!-- Table for user enrollments in annual plans -->
+        <TABLE NAME="local_annual_plan_user" COMMENT="User enrollments in annual plans">
+            <FIELDS>
+                <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+                <FIELD NAME="userid" TYPE="int" LENGTH="10" NOTNULL="true"/>
+                <FIELD NAME="fullname" TYPE="char" LENGTH="255" NOTNULL="false"/>
+                <FIELD NAME="courseid" TYPE="int" LENGTH="10" NOTNULL="true"/>
+                <FIELD NAME="annualplanid" TYPE="int" LENGTH="10" NOTNULL="true"/>
+                <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true"/>
+                <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true"/>
+            </FIELDS>
+            <KEYS>
+                <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+                <KEY NAME="user_fk" TYPE="foreign" FIELDS="userid" REFTABLE="user" REFFIELDS="id"/>
+                <KEY NAME="course_fk" TYPE="foreign" FIELDS="courseid" REFTABLE="course" REFFIELDS="id"/>
+                <KEY NAME="annualplan_fk" TYPE="foreign" FIELDS="annualplanid" REFTABLE="local_annual_plan" REFFIELDS="id"/>
+            </KEYS>
+            <INDEXES>
+                <INDEX NAME="userid_courseid_uix" UNIQUE="true" FIELDS="userid,courseid,annualplanid"/>
+            </INDEXES>
+        </TABLE>
+        <!-- New table for course levels -->
+        <TABLE NAME="local_annual_plan_course_level" COMMENT="Table for storing course levels">
+            <FIELDS>
+                <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true" COMMENT="Primary key for course levels"/>
+                <FIELD NAME="name" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false" COMMENT="Name of the course level"/>
+                <FIELD NAME="description_en" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="Description of the course level in English"/>
+                <FIELD NAME="description_ar" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="Description of the course level in Arabic"/>
+                <FIELD NAME="is_internal" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="1" SEQUENCE="false" COMMENT="Whether this level is for internal (1) or external (0) courses"/>
+            </FIELDS>
+            <KEYS>
+                <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+            </KEYS>
+        </TABLE>
+        <!-- New table for course codes -->
+        <TABLE NAME="local_annual_plan_course_codes" COMMENT="Table for storing course code combinations">
+            <FIELDS>
+                <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true" COMMENT="Primary key for course codes"/>
+                <FIELD NAME="type" TYPE="char" LENGTH="50" NOTNULL="true" SEQUENCE="false" COMMENT="Type of code (category, level, course)"/>
+                <FIELD NAME="code_en" TYPE="char" LENGTH="50" NOTNULL="true" SEQUENCE="false" COMMENT="The code value in English"/>
+                <FIELD NAME="code_ar" TYPE="char" LENGTH="50" NOTNULL="true" SEQUENCE="false" COMMENT="The code value in Arabic,,, not used in the code"/>
+                <FIELD NAME="description_en" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="Detailed description of the code in English"/>
+                <FIELD NAME="description_ar" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="Detailed description of the code in Arabic"/>
+                <FIELD NAME="type_id" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="Reference ID (category_id or level_id, null for course)"/>
+                <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="Timestamp when code was created"/>
+                <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="Timestamp when code was last modified"/>
+            </FIELDS>
+            <KEYS>
+                <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+            </KEYS>
+            <INDEXES>
+                <INDEX NAME="type_typeid_idx" UNIQUE="false" FIELDS="type, type_id" COMMENT="Index on type and type_id for faster queries"/>
+                <INDEX NAME="code_en_idx" UNIQUE="false" FIELDS="code_en" COMMENT="Index on code_en for faster code lookups"/>
+            </INDEXES>
+        </TABLE>
+
+                <!-- New table for Finance Source -->
+        <TABLE NAME="local_annual_plan_finance_source" COMMENT="Table for storing finance source code with description">
+            <FIELDS>
+                <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true" COMMENT="Primary key for course codes"/>
+                <FIELD NAME="code" TYPE="char" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="code (training plan, Work, Project)"/>
+                <FIELD NAME="description_en" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="Detailed description of the code in English"/>
+                <FIELD NAME="description_ar" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="Detailed description of the code in Arabic"/>
+            </FIELDS>
+            <KEYS>
+                <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+            </KEYS>
+        </TABLE>
+        <!-- New table for beneficiaries -->
+        <TABLE NAME="local_annual_plan_beneficiaries" COMMENT="Table for storing beneficiaries of annual plan courses">
+            <FIELDS>
+                <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true" COMMENT="Primary key for beneficiaries"/>
+                <FIELD NAME="courseid" TYPE="char" LENGTH="100" NOTNULL="true" SEQUENCE="false" COMMENT="Identifier for the associated course"/>
+                <FIELD NAME="coursedate" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="Date when the course is scheduled, stored as a timestamp"/>
+                <FIELD NAME="annualplanid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="Foreign key referencing local_annual_plan"/>
+                <FIELD NAME="pf_number" TYPE="char" LENGTH="50" NOTNULL="true" SEQUENCE="false" COMMENT="PF/Civil identifier sourced from Oracle (DUNIA_EMPLOYEES/DUNIA_PERSONAL_DETAILS)"/>
+                <FIELD NAME="fullname" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false" COMMENT="Person full name sourced from Oracle"/>
+                <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="Timestamp when beneficiary record was created"/>
+                <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="Timestamp when beneficiary record was last modified"/>
+                <FIELD NAME="created_by" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="User ID who created the record"/>
+                <FIELD NAME="modified_by" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="User ID who last modified the record"/>
+            </FIELDS>
+            <KEYS>
+                <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+            </KEYS>
+            <INDEXES>
+                <INDEX NAME="courseid_date_plan_idx" UNIQUE="false" FIELDS="courseid, coursedate, annualplanid" COMMENT="Index on courseid, coursedate, and annualplanid for faster queries"/>
+            </INDEXES>
+        </TABLE>
+    </TABLES>
+</XMLDB>

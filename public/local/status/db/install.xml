@@ -1,0 +1,159 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<XMLDB PATH="local/status/db" VERSION="2025060402"
+       COMMENT="XMLDB for local_status plugin"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:noNamespaceSchemaLocation="../../../../lib/xmldb/xmldb.xsd">
+
+  <TABLES>
+
+    <!-- 1. Workflow types/categories -->
+    <TABLE NAME="local_status_type" COMMENT="Types of workflows">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="name" TYPE="char" LENGTH="100" NOTNULL="true" COMMENT="Internal name (unique identifier)"/>
+        <FIELD NAME="display_name_en" TYPE="char" LENGTH="255" NOTNULL="true" COMMENT="Display name in English"/>
+        <FIELD NAME="display_name_ar" TYPE="char" LENGTH="255" NOTNULL="true" COMMENT="Display name in Arabic"/>
+        <FIELD NAME="plugin_name" TYPE="char" LENGTH="100" NOTNULL="false" COMMENT="Plugin that owns this workflow"/>
+        <FIELD NAME="is_active" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="1" COMMENT="Is this workflow active"/>
+        <FIELD NAME="sort_order" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" COMMENT="Display order"/>
+        <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true"/>
+        <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="false"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+      </KEYS>
+      <INDEXES>
+        <INDEX NAME="name_unique" UNIQUE="true" FIELDS="name"/>
+        <INDEX NAME="plugin_active_ix" UNIQUE="false" FIELDS="plugin_name, is_active"/>
+      </INDEXES>
+    </TABLE>
+
+    <!-- 2. Individual workflow steps -->
+    <TABLE NAME="local_status" COMMENT="Workflow steps with metadata">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="type_id" TYPE="int" LENGTH="10" NOTNULL="true"/>
+        <FIELD NAME="seq" TYPE="int" LENGTH="5" NOTNULL="true" COMMENT="Position in workflow"/>
+        <FIELD NAME="name" TYPE="char" LENGTH="100" NOTNULL="true" COMMENT="Internal step name"/>
+        <FIELD NAME="display_name_en" TYPE="char" LENGTH="255" NOTNULL="true"/>
+        <FIELD NAME="display_name_ar" TYPE="char" LENGTH="255" NOTNULL="true"/>
+        <FIELD NAME="capability" TYPE="char" LENGTH="255" NOTNULL="false" COMMENT="Required capability to approve (legacy)"/>
+        <FIELD NAME="color" TYPE="char" LENGTH="7" NOTNULL="false" COMMENT="HEX color code for UI"/>
+        <FIELD NAME="icon" TYPE="char" LENGTH="50" NOTNULL="false" COMMENT="Icon class/name"/>
+        <FIELD NAME="is_initial" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" COMMENT="Is this the initial step"/>
+        <FIELD NAME="is_final" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" COMMENT="Is this the final step"/>
+        <FIELD NAME="is_active" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="1" COMMENT="Is this step active"/>
+        <FIELD NAME="approval_type" TYPE="char" LENGTH="20" NOTNULL="true" DEFAULT="capability" COMMENT="capability, user, any"/>
+        <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true"/>
+        <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="false"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="type_fk" TYPE="foreign" FIELDS="type_id" REFTABLE="local_status_type" REFFIELDS="id"/>
+      </KEYS>
+      <INDEXES>
+        <INDEX NAME="type_seq_uq" UNIQUE="true" FIELDS="type_id, seq"/>
+        <INDEX NAME="type_name_uq" UNIQUE="true" FIELDS="type_id, name"/>
+      </INDEXES>
+    </TABLE>
+
+    <!-- 3. NEW: Workflow step approvers - specific users who can approve each step -->
+    <TABLE NAME="local_status_approvers" COMMENT="Users who can approve specific workflow steps">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="step_id" TYPE="int" LENGTH="10" NOTNULL="true"/>
+        <FIELD NAME="user_id" TYPE="int" LENGTH="10" NOTNULL="true"/>
+        <FIELD NAME="sequence_order" TYPE="int" LENGTH="5" NOTNULL="true" DEFAULT="1" COMMENT="Order for sequential approvals within the step"/>
+        <FIELD NAME="is_required" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="1" COMMENT="Is this approver required"/>
+        <FIELD NAME="is_active" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="1"/>
+        <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true"/>
+        <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="false"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="step_fk" TYPE="foreign" FIELDS="step_id" REFTABLE="local_status" REFFIELDS="id"/>
+        <KEY NAME="user_fk" TYPE="foreign" FIELDS="user_id" REFTABLE="user" REFFIELDS="id"/>
+      </KEYS>
+      <INDEXES>
+        <INDEX NAME="step_user_uq" UNIQUE="true" FIELDS="step_id, user_id"/>
+        <INDEX NAME="step_sequence_ix" UNIQUE="false" FIELDS="step_id, sequence_order"/>
+      </INDEXES>
+    </TABLE>
+
+    <!-- 4. Workflow transitions (simplified) -->
+    <TABLE NAME="local_status_transition" COMMENT="Allowed transitions between workflow steps">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="type_id" TYPE="int" LENGTH="10" NOTNULL="true"/>
+        <FIELD NAME="from_status_id" TYPE="int" LENGTH="10" NOTNULL="false" COMMENT="Source status (NULL = from any)"/>
+        <FIELD NAME="to_status_id" TYPE="int" LENGTH="10" NOTNULL="true" COMMENT="Target status"/>
+        <FIELD NAME="transition_type" TYPE="char" LENGTH="20" NOTNULL="true" COMMENT="approve, reject, manual"/>
+        <FIELD NAME="display_name_en" TYPE="char" LENGTH="255" NOTNULL="true"/>
+        <FIELD NAME="display_name_ar" TYPE="char" LENGTH="255" NOTNULL="false"/>
+        <FIELD NAME="required_capability" TYPE="char" LENGTH="255" NOTNULL="false"/>
+        <FIELD NAME="is_active" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="1"/>
+        <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="type_fk" TYPE="foreign" FIELDS="type_id" REFTABLE="local_status_type" REFFIELDS="id"/>
+        <KEY NAME="from_status_fk" TYPE="foreign" FIELDS="from_status_id" REFTABLE="local_status" REFFIELDS="id"/>
+        <KEY NAME="to_status_fk" TYPE="foreign" FIELDS="to_status_id" REFTABLE="local_status" REFFIELDS="id"/>
+      </KEYS>
+      <INDEXES>
+        <INDEX NAME="workflow_transition_ix" UNIQUE="false" FIELDS="type_id, from_status_id, to_status_id"/>
+      </INDEXES>
+    </TABLE>
+
+    <!-- 5. Workflow history/audit trail (enhanced) -->
+    <TABLE NAME="local_status_history" COMMENT="Audit trail for workflow transitions">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="type_id" TYPE="int" LENGTH="10" NOTNULL="true"/>
+        <FIELD NAME="record_id" TYPE="int" LENGTH="10" NOTNULL="true" COMMENT="ID of the record in the external table"/>
+        <FIELD NAME="from_status_id" TYPE="int" LENGTH="10" NOTNULL="false"/>
+        <FIELD NAME="to_status_id" TYPE="int" LENGTH="10" NOTNULL="true"/>
+        <FIELD NAME="user_id" TYPE="int" LENGTH="10" NOTNULL="true" COMMENT="User who made the transition"/>
+        <FIELD NAME="approver_sequence" TYPE="int" LENGTH="5" NOTNULL="false" COMMENT="Which approver in sequence made this approval"/>
+        <FIELD NAME="note" TYPE="text" NOTNULL="false" COMMENT="Note/comment from user"/>
+        <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="type_fk" TYPE="foreign" FIELDS="type_id" REFTABLE="local_status_type" REFFIELDS="id"/>
+        <KEY NAME="from_status_fk" TYPE="foreign" FIELDS="from_status_id" REFTABLE="local_status" REFFIELDS="id"/>
+        <KEY NAME="to_status_fk" TYPE="foreign" FIELDS="to_status_id" REFTABLE="local_status" REFFIELDS="id"/>
+        <KEY NAME="user_fk" TYPE="foreign" FIELDS="user_id" REFTABLE="user" REFFIELDS="id"/>
+      </KEYS>
+      <INDEXES>
+        <INDEX NAME="record_workflow_ix" UNIQUE="false" FIELDS="type_id, record_id"/>
+        <INDEX NAME="user_time_ix" UNIQUE="false" FIELDS="user_id, timecreated"/>
+      </INDEXES>
+    </TABLE>
+
+    <!-- 6. NEW: Workflow instance state tracking -->
+    <TABLE NAME="local_status_instance" COMMENT="Current state of workflow instances">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="type_id" TYPE="int" LENGTH="10" NOTNULL="true"/>
+        <FIELD NAME="record_id" TYPE="int" LENGTH="10" NOTNULL="true" COMMENT="ID of the record in the external table"/>
+        <FIELD NAME="current_status_id" TYPE="int" LENGTH="10" NOTNULL="true"/>
+        <FIELD NAME="current_approver_sequence" TYPE="int" LENGTH="5" NOTNULL="true" DEFAULT="1" COMMENT="Which approver is next in the current step"/>
+        <FIELD NAME="created_by" TYPE="int" LENGTH="10" NOTNULL="true"/>
+        <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true"/>
+        <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="false"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="type_fk" TYPE="foreign" FIELDS="type_id" REFTABLE="local_status_type" REFFIELDS="id"/>
+        <KEY NAME="status_fk" TYPE="foreign" FIELDS="current_status_id" REFTABLE="local_status" REFFIELDS="id"/>
+        <KEY NAME="created_by_fk" TYPE="foreign" FIELDS="created_by" REFTABLE="user" REFFIELDS="id"/>
+      </KEYS>
+      <INDEXES>
+        <INDEX NAME="workflow_record_uq" UNIQUE="true" FIELDS="type_id, record_id"/>
+        <INDEX NAME="status_sequence_ix" UNIQUE="false" FIELDS="current_status_id, current_approver_sequence"/>
+      </INDEXES>
+    </TABLE>
+
+  </TABLES>
+</XMLDB>

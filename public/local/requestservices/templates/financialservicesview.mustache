@@ -1,0 +1,64 @@
+<table class="custom-table">
+
+
+    <thead>
+        <tr>
+            <th>{{#str}}course, local_requestservices{{/str}}</th>
+            <th>{{#str}}fundingtype, local_requestservices{{/str}}</th>
+            <th>{{#str}}pricerequested, local_requestservices{{/str}}</th>
+            <th>{{#str}}requestdate, local_requestservices{{/str}}</th>
+            <th>{{#str}}status, local_requestservices{{/str}}</th>
+           
+
+        </tr>
+    </thead>
+    <tbody>
+        {{#financeservices}}
+        <tr>
+            <td>{{course}}</td>
+            <td>{{funding_type_ar}}</td>
+            <td>{{price_requested}}</td>
+            <td>{{date_time_requested}}</td>
+            <td>{{readable_status}}</td>
+            
+        </tr>
+        {{/financeservices}}
+    </tbody>
+</table>
+
+
+<script>
+function approveHandler(data) { 
+  fetch('actions/update_request_status.php', {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/x-www-form-urlencoded",
+    },
+    body: JSON.stringify(data),
+  })
+    .then(() => {
+      location.reload();
+    })
+    .catch((error) => {
+      console.error("Error:", error);
+    });
+}
+
+function rejectionHandler(rejectionNote, data) {
+  if(rejectionNote)
+    data.rejection_note = rejectionNote;
+    console.log(data)
+  fetch('actions/update_request_status.php', {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/x-www-form-urlencoded",
+    },
+    body: JSON.stringify(data),
+  })
+    .then(() => {
+    })
+    .catch((error) => {
+      console.error("Error:", error);
+    });
+}
+</script>

@@ -1,0 +1,81 @@
+<div class="modal" id="lecturer-modal" style="display: none;">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">{{str.addlecturermodal}}</h5>
+                <button type="button" class="close" id="close-lecturer-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="lecturer-form" class="form-container">
+                    <input type="hidden" id="id" name="id" value="">
+
+                    <div class="form-group">
+                        <label for="name">{{str.name}}</label>
+                        <!-- OLD AUTOCOMPLETE CODE (COMMENTED OUT):
+                        <div class="autocomplete-container" style="position: relative;">
+                            <input type="text" id="name" name="name" class="form-control" 
+                                   placeholder="{{str.starttyping}}" 
+                                   minlength="2" maxlength="50" required autocomplete="off">
+                            <div id="autocomplete-suggestions" class="autocomplete-suggestions" 
+                                 style="display: none; position: absolute; top: 100%; left: 0; right: 0; 
+                                        background: white; border: 1px solid #ccc; border-top: none; 
+                                        max-height: 200px; overflow-y: auto; z-index: 1000;">
+                            </div>
+                        </div>
+                        -->
+                        <!-- NEW HARDCODED FORM FIELD -->
+                        <input type="text" id="name" name="name" class="form-control"        
+                               minlength="2" maxlength="50" required>  <!-- placeholder="{{str.name}}" -->
+                        <input type="hidden" id="civil_number" name="civil_number">
+                        <input type="hidden" id="lecturer_type" name="lecturer_type" value="external_visitor">
+                    </div>
+                    <div class="form-group">
+                        <label for="age">{{str.age}}</label>
+                        <input type="number" id="age" name="age" class="form-control" min="18" max="99" 
+                               title="{{str.agevalidation}}" 
+                               required>
+                    </div>
+                    <div class="form-group">
+                        <label for="specialization">{{str.specialization}}</label>
+                        <input type="text" id="specialization" name="specialization" class="form-control" minlength="2" maxlength="100" 
+                               pattern="[A-Za-z\u0600-\u06FF\s]+" 
+                               title="{{str.specializationvalidation}}" 
+                               required>
+                    </div>
+                    <div class="form-group">
+                        <label for="organization">{{str.organization}}</label>
+                        <input type="text" id="organization" name="organization" class="form-control" minlength="2" maxlength="100" 
+                               pattern="[A-Za-z\u0600-\u06FF0-9\s]+"
+                               title="{{str.organizationvalidation}}" 
+                               required>
+                    </div>
+                     <div class="form-group">
+                         <label for="nationality">{{str.nationality}}</label>
+                         <input type="text" id="nationality" name="nationality" class="form-control" minlength="2" maxlength="100">
+                     </div>
+                    <div class="form-group">
+                        <label for="degree">{{str.degree}}</label>
+                        <input type="text" id="degree" name="degree" class="form-control" minlength="2" maxlength="100" 
+                               pattern="[A-Za-z\u0600-\u06FF\s]+" 
+                               title="{{str.degreevalidation}}" 
+                               required>
+                    </div>
+                    <div class="form-group">
+                        <label for="passport">{{str.passport}}</label>
+                        <!-- OLD READONLY FIELD (COMMENTED OUT):
+                        <input type="text" id="passport" name="passport" class="form-control" 
+                               title="{{str.civilnumberauto}}" 
+                               readonly required>
+                        -->
+                        <!-- NEW EDITABLE FIELD -->
+                        <input type="text" id="passport" name="passport" class="form-control"  
+                               minlength="2" maxlength="20" required> <!-- placeholder="{{str.passport}}" -->
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-primary" id="save-lecturer">{{str.save}}</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

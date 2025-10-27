@@ -1,0 +1,71 @@
+<table class="generaltable boxaligncenter">
+
+  <thead>
+    <tr>
+      <th>{{#str}}course, local_reports{{/str}}</th>
+      <th>{{#str}}user, local_reports{{/str}}</th>
+      <th>{{#str}}researchtitle, local_reports{{/str}}</th>
+      <th>{{#str}}modified{{/str}}</th>
+      <th>{{#str}}status{{/str}}</th>
+      <th>{{#str}}action, local_reports{{/str}}</th>
+    </tr>
+  </thead>
+  <tbody>
+    {{#reports}}
+    <tr id="report-row-{{userid}}">
+      <td>{{course}}</td>
+      <td>{{username}}</td>
+      <td>{{researchtitle}}</td>
+      <td>{{timemodified}}</td>
+      <td class="status-cell">{{status}}</td>
+      <td>
+      {{#researchtitle}}
+      <button class="btn btn-info preview-report"
+        data-url="{{previewurl}}"
+        data-actiontitle="{{#str}}preview, local_reports{{/str}}">
+      {{#str}}preview, local_reports{{/str}}
+    </button>
+      {{/researchtitle}}
+      
+        {{#canedit}}
+            <button class="btn btn-secondary open-report-form"
+                    data-url="{{url}}"
+                    data-actiontitle="{{actiontitle}}">
+            {{actiontitle}}
+            </button>
+        {{/canedit}}
+        {{^canedit}}
+            <button class="btn btn-secondary" disabled>
+            {{actiontitle}}
+            </button>
+        {{/canedit}}
+        {{#canapprove}}
+          <button class="btn btn-success approve-report"
+                  data-url="{{approveurl}}">
+            {{#str}}approve, local_reports{{/str}}
+          </button>
+        {{/canapprove}}
+
+        {{#candisapprove}}
+          <button class="btn btn-danger disapprove-report"
+                  data-url="{{disapproveurl}}">
+            {{#str}}disapprove, local_reports{{/str}}
+          </button>
+        {{/candisapprove}}
+      </td>
+    </tr>
+    {{/reports}}
+    {{^reports}}
+    <tr>
+      <td colspan="7">{{#str}}nothingtodisplay, core{{/str}}</td>
+    </tr>
+    {{/reports}}
+  </tbody>
+</table>
+
+<button id="approve-all-btn" class="btn btn-primary mt-3">
+  {{#str}}approveall, local_reports{{/str}}
+</button>
+<button id="disapprove-all-btn" class="btn btn-danger mt-3">
+  {{#str}}disapproveall, local_reports{{/str}}
+</button>

@@ -1,0 +1,1728 @@
+<!-- HTML Table Structure -->
+<style>
+.custom-table thead th {
+    background-color:rgb(78, 109, 143) !important;
+    color: #ffffff !important;
+    font-weight: bold;
+    border: 1px solid #34495e;
+    padding: 12px 8px;
+}
+.custom-table thead th:hover {
+    background-color: #34495e !important;
+}
+</style>
+<table class="custom-table" id="annualplan-courses-table">
+    <tr>
+        <th>{{#str}}annualplantitle, local_annualplans{{/str}}</th>
+        <th>{{#str}}courseid, local_annualplans{{/str}}</th>
+        <th>{{#str}}coursename, local_annualplans{{/str}}</th>
+        <th>{{#str}}category, local_annualplans{{/str}}</th>
+        <th>{{#str}}coursedurationdays, local_annualplans{{/str}}</th>
+        <th>{{#str}}numberofbeneficiaries, local_annualplans{{/str}}</th>
+        <th>{{#str}}status, local_annualplans{{/str}}</th>
+        <th>{{#str}}level, local_annualplans{{/str}}</th>
+        <th>{{#str}}place, local_annualplans{{/str}}</th>
+        <th>{{#str}}createcourse, local_annualplans{{/str}}</th>
+        <th></th>
+    </tr>
+    {{#courses}}
+    <tr>
+        <td>{{annualplantitle}}</td>
+        <td>{{courseid}}</td>
+        <td>{{coursename}}</td>
+        <td>
+            {{#category}}{{category}}{{/category}}{{^category}}لم يتم تحديد القسم{{/category}}
+        </td>
+        <td>{{coursedate_formatted}}</td>
+        <td>
+            <span id="beneficiaries-count-{{courseid}}-{{coursedate}}">{{numberofbeneficiaries}}</span>
+            {{^is_added_course}}
+            <button type="button" class="beneficiaries-plus-btn" 
+                    onclick="openBeneficiariesDialog('{{courseid}}', {{coursedate}}, {{annualplanid}}, false)" 
+                    title="إدارة المنتسبين"
+                    data-course-approved="false">
+                <i class="fa fa-plus" aria-hidden="true"></i>
+            </button>
+            {{/is_added_course}}
+            {{#is_added_course}}
+            <span class="beneficiaries-locked-icon" title="تم اعتماد الدورة - لا يمكن تعديل المنتسبين">
+                <i class="fa fa-lock" aria-hidden="true"></i>
+            </span>
+            {{/is_added_course}}
+        </td>
+        <td>{{status}}</td>
+        <td>
+            {{#selected_level_name}}{{selected_level_name}}{{/selected_level_name}}{{^selected_level_name}}لم يتم تحديد التصنيف{{/selected_level_name}}
+        </td>
+        <td>
+            <!-- Display the place as plain text -->
+            <span id="place-text-{{courseid}}">{{place}}</span>
+
+            <!-- Hidden form for editing place -->
+            <div id="place-form-container-{{courseid}}" style="display:none;">
+                <form method="post" action="" id="place-form-{{courseid}}">
+                    <input type="hidden" name="formaction" value="update_place">
+                    <input type="hidden" name="courseid" value="{{courseid}}">
+                    <input type="hidden" name="coursedate" value="{{coursedate}}">
+                    <input type="hidden" name="sesskey" value="{{sesskey}}">
+                    <input type="hidden" name="annualplanid" value="{{annualplanid}}">
+                    <input type="text" name="place" value="{{place}}" placeholder="أدخل المكان">
+                    <button type="submit" class="place-submit-btn"><i class="fa fa-check"></i></button>
+                    <button type="button" class="place-clear-btn" onclick="cancelEditPlace('{{courseid}}')"><i class="fa fa-times"></i></button>
+                </form>
+            </div>
+        </td>
+        <td>
+            <form method="post" style="display:inline;" id="form_{{courseid}}">
+                {{>local_annualplans/hidden_fields}}
+                <input type="hidden" name="formaction" value="{{#is_added_course}}delete_course{{/is_added_course}}{{^is_added_course}}add_course{{/is_added_course}}">
+                <input type="hidden" name="courseid" value="{{courseid}}">
+                <input type="hidden" name="coursedate" value="{{coursedate}}">
+                <input type="hidden" name="sesskey" value="{{sesskey}}">
+                <input type="hidden" name="annualplanid" value="{{annualplanid}}">
+
+                <!-- Hidden field for unapproved note -->
+                <input type="hidden" name="unapprove_note" value="{{unapprove_note}}">
+
+                <label class="switch">
+                    <input type="checkbox" name="add_course" onclick="handleCheckboxClick(event, this, '{{courseid}}')" {{#is_added_course}}checked{{/is_added_course}}>
+                    <span class="slider round"></span>
+                </label>
+            </form>
+        </td>
+
+        <td>
+            <!-- Settings dropdown button -->
+            <div class="settings-dropdown">
+                <button type="button" class="settings-btn" onclick="toggleSettingsMenu('{{courseid}}')">
+                    <i class="fa fa-cog" aria-hidden="true"></i>
+                </button>
+                <div class="settings-menu" id="settings-menu-{{courseid}}">
+                    <!-- Edit Place button -->
+                    <button type="button" class="edit-place-btn" onclick="editPlace('{{courseid}}')">
+                        <i class="fa fa-pencil" aria-hidden="true"></i> تحرير المكان 
+                    </button>
+                    <!-- Delete Course button -->
+                    <form method="post" style="display:inline;" id="delete-course-form-{{courseid}}">
+                        {{>local_annualplans/hidden_fields}}
+                        <input type="hidden" name="delete_course_row" value="delete_course_row">
+                        <input type="hidden" name="courseid" value="{{courseid}}">
+                        <input type="hidden" name="coursedate" value="{{coursedate}}">
+                        <input type="hidden" name="sesskey" value="{{sesskey}}">
+                        <input type="hidden" name="annualplanid" value="{{annualplanid}}">
+                        <!-- Hidden field for deletion note -->
+                        <input type="hidden" name="deletion_note" value="{{deletion_note}}">
+
+                        <button type="button" name="delete_course_row" class="delete-course-icon-btn" onclick="showDeleteCourseModal('{{courseid}}')">
+                            <i class="fa fa-trash" aria-hidden="true"></i> حذف الدورة
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </td>
+    </tr>
+    {{/courses}}
+</table>
+
+<!-- Beneficiaries Dialog Modal -->
+<div id="beneficiariesModal" class="beneficiaries-modal" style="display: none;">
+    <div class="beneficiaries-modal-content">
+        <div class="beneficiaries-modal-header">
+            <h3>إدارة المنتسبين</h3>
+            <span class="beneficiaries-close" onclick="closeBeneficiariesDialog()">&times;</span>
+        </div>
+        <div class="beneficiaries-modal-body">
+            <div class="search-container">
+                <div class="table-selector">
+                    <label style="margin-right: 15px;">
+                        <input type="radio" name="tableSource" value="employees" checked onchange="filterEmployees()"> 
+                        جدول الموظفين
+                    </label>
+                    <label style="margin-right: 15px;">
+                        <input type="radio" name="tableSource" value="personal" onchange="filterEmployees()"> 
+                        جدول البيانات الشخصية
+                    </label>
+                    <label>
+                        <input type="radio" name="tableSource" value="both" onchange="filterEmployees()"> 
+                        كلا الجدولين
+                    </label>
+                </div>
+                <input type="text" id="employeeSearch" placeholder="البحث عن موظف..." onkeyup="filterEmployees()" style="margin-top: 10px;">
+            </div>
+            <div class="employees-container">
+                <div class="employees-table-container" id="employeesTableContainer">
+                    <!-- Employee table will be loaded here -->
+                </div>
+            </div>
+            <div class="selected-employees-container">
+                <h4>المنتسبون المختارون:</h4>
+                <div class="selected-employees-table-container" id="selectedEmployeesTableContainer">
+                    <!-- Selected employees table will be shown here -->
+                </div>
+            </div>
+        </div>
+        <div class="beneficiaries-modal-footer">
+            <button type="button" class="btn btn-primary" onclick="saveBeneficiaries()">حفظ</button>
+            <button type="button" class="btn btn-secondary" onclick="closeBeneficiariesDialog()">إلغاء</button>
+        </div>
+    </div>
+</div>
+
+<!-- Include Necessary Libraries -->
+<script src="{{config.wwwroot}}/local/annualplans/js/xlsx.full.min.js"></script>
+<script src="{{config.wwwroot}}/local/annualplans/js/jspdf.umd.min.js"></script>
+<script src="{{config.wwwroot}}/local/annualplans/js/html2canvas.min.js"></script>
+
+<!-- Add the Download CSV Button at the Bottom of the Table -->
+<div class="download-button-container">
+    <button id="download-button">تنزيل الجدول</button>
+    <div id="download-menu" class="download-menu">
+        <a href="#" data-type="csv">صيغة CSV</a>
+        <a href="#" data-type="excel">صيغة Excel</a>
+    </div>
+</div>
+
+<!-- Pagination Container -->
+<div id="pagination" class="pagination-container"></div>
+
+<!-- CSS Styles -->
+<style>
+    /* Settings dropdown styles */
+    .settings-dropdown {
+        position: relative;
+        display: inline-block;
+    }
+
+.settings-btn {
+    background-color: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 5px;
+    display: inline-block;
+    width: 100%; /* Make the button span the full width */
+    height: 100%; /* Optional: Make the button span the full height if needed */
+}
+
+    .settings-menu {
+        display: none;
+        position: absolute;
+        top: 100%; /* Position below the button */
+        left: 50%;
+        transform: translateX(-50%);
+        z-index: 1000;
+        background-color: white;
+        min-width: 120px;
+        border: 1px solid #ccc;
+        padding: 5px 0;
+    }
+
+    .settings-menu button {
+        background-color: transparent;
+        border: none;
+        width: 100%;
+        padding: 8px 16px;
+        cursor: pointer;
+        display: flex;            /* Use flexbox for alignment */
+        align-items: center;      /* Center items vertically */
+        justify-content: flex-end;/* Align items to the right */
+        text-align: right;        /* For text alignment in RTL */
+    }
+
+   .settings-menu button i {
+    margin-right: 0; /* Add space between icon and text */
+    margin-left: 8px;     /* Ensure no space between icon and border */
+    pointer-events: none;
+}
+
+    .settings-menu button:hover {
+        background-color: #f1f1f1;
+    }
+
+    /* Additional styles for the place input */
+    .place-submit-btn, .place-clear-btn {
+        background-color: transparent;
+        border: none;
+        cursor: pointer;
+    }
+
+    .place-submit-btn i, .place-clear-btn i {
+        font-size: 16px;
+    }
+
+    /* Style for the settings icon */
+ .settings-btn i {
+    pointer-events: none; /* Added */
+}
+
+    /* Beneficiaries Plus Button Styles */
+    .beneficiaries-plus-btn {
+        background-color: #007bff;
+        color: white;
+        border: none;
+        border-radius: 50%;
+        width: 25px;
+        height: 25px;
+        cursor: pointer;
+        margin-left: 8px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 12px;
+    }
+
+    .beneficiaries-plus-btn:hover {
+        background-color: #0056b3;
+    }
+
+    /* Beneficiaries Locked Icon Styles */
+    .beneficiaries-locked-icon {
+        color: #6c757d;
+        margin-left: 8px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 14px;
+        cursor: help;
+    }
+
+    .beneficiaries-locked-icon i {
+        pointer-events: none;
+    }
+
+    /* Beneficiaries Modal Styles */
+    .beneficiaries-modal {
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0,0,0,0.5);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .beneficiaries-modal-content {
+        background-color: white;
+        border-radius: 8px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        width: 90%;
+        max-width: 800px;
+        max-height: 80%;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .beneficiaries-modal-header {
+        padding: 15px 20px;
+        border-bottom: 1px solid #dee2e6;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background-color: #f8f9fa;
+    }
+
+    .beneficiaries-modal-header h3 {
+        margin: 0;
+        color: #333;
+    }
+
+    .beneficiaries-close {
+        font-size: 24px;
+        font-weight: bold;
+        cursor: pointer;
+        color: #aaa;
+    }
+
+    .beneficiaries-close:hover {
+        color: #000;
+    }
+
+    .beneficiaries-modal-body {
+        padding: 20px;
+        flex: 1;
+        overflow-y: auto;
+    }
+
+    .search-container {
+        margin-bottom: 15px;
+    }
+
+    #employeeSearch {
+        width: 100%;
+        padding: 8px 12px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        font-size: 14px;
+    }
+
+    .employees-container {
+        max-height: 200px;
+        overflow-y: auto;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        margin-bottom: 20px;
+    }
+
+    .employee-item {
+        padding: 8px 12px;
+        border-bottom: 1px solid #eee;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+    }
+
+    .employee-item:hover {
+        background-color: #f5f5f5;
+    }
+
+    .employee-item input[type="checkbox"] {
+        margin-right: 8px;
+    }
+
+    .selected-employees-container {
+        border-top: 1px solid #ddd;
+        padding-top: 15px;
+    }
+
+    .selected-employees-container h4 {
+        margin-bottom: 10px;
+        color: #333;
+    }
+
+
+
+    .beneficiaries-modal-footer {
+        padding: 15px 20px;
+        border-top: 1px solid #dee2e6;
+        display: flex;
+        justify-content: flex-end;
+        gap: 10px;
+        background-color: #f8f9fa;
+    }
+
+    .btn {
+        padding: 8px 16px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 14px;
+    }
+
+    .btn-primary {
+        background-color: #007bff;
+        color: white;
+    }
+
+    .btn-primary:hover {
+        background-color: #0056b3;
+    }
+
+    .btn-secondary {
+        background-color: #6c757d;
+        color: white;
+    }
+
+    .btn-secondary:hover {
+        background-color: #545b62;
+    }
+
+    /* Message styles for employee list */
+    .search-instruction-message, .no-match-message {
+        border-top: 1px solid #eee;
+        margin-top: 5px;
+    }
+
+    .search-instruction-message p, .no-match-message p {
+        margin: 0;
+        font-size: 13px;
+    }
+
+    /* Table selector styling */
+    .table-selector {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin-bottom: 10px;
+        padding: 10px;
+        background-color: #f8f9fa;
+        border-radius: 4px;
+        border: 1px solid #dee2e6;
+    }
+
+    .table-selector label {
+        display: flex;
+        align-items: center;
+        cursor: pointer;
+        font-weight: 500;
+    }
+
+    .table-selector input[type="radio"] {
+        margin-left: 5px;
+    }
+
+    /* Employee table styling */
+    .employees-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 10px;
+        font-size: 14px;
+    }
+
+    .employees-table th {
+        background-color: #f8f9fa;
+        border: 1px solid #dee2e6;
+        padding: 8px;
+        text-align: center;
+        font-weight: 600;
+        color: #495057;
+    }
+
+    .employees-table td {
+        border: 1px solid #dee2e6;
+        padding: 8px;
+        text-align: center;
+        vertical-align: middle;
+    }
+
+    .employees-table tbody tr:hover {
+        background-color: #f5f5f5;
+    }
+
+    .employees-table tbody tr:nth-child(even) {
+        background-color: #fafafa;
+    }
+
+    /* Source type styling */
+    .source-employee {
+        background-color: #d4edda !important;
+        color: #155724;
+        font-weight: 500;
+    }
+
+    .source-personal {
+        background-color: #d1ecf1 !important;
+        color: #0c5460;
+        font-weight: 500;
+    }
+
+    /* Remove employee button styling */
+    .remove-employee-btn {
+        background-color: #dc3545;
+        color: white;
+        border: none;
+        border-radius: 50%;
+        width: 24px;
+        height: 24px;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 12px;
+    }
+
+    .remove-employee-btn:hover {
+        background-color: #c82333;
+    }
+
+    /* Table container styling */
+    .employees-table-container {
+        max-height: 400px;
+        overflow-y: auto;
+        border: 1px solid #dee2e6;
+        border-radius: 4px;
+    }
+
+    /* Selected employees table styling */
+    .selected-employees-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 10px;
+        font-size: 14px;
+    }
+
+    .selected-employees-table th {
+        background-color: #f8f9fa;
+        border: 1px solid #dee2e6;
+        padding: 8px;
+        text-align: center;
+        font-weight: 600;
+        color: #495057;
+    }
+
+    .selected-employees-table td {
+        border: 1px solid #dee2e6;
+        padding: 8px;
+        text-align: center;
+        vertical-align: middle;
+    }
+
+    .selected-employees-table tbody tr:hover {
+        background-color: #fff3cd;
+    }
+
+    .selected-employees-table tbody tr:nth-child(even) {
+        background-color: #f8f9fa;
+    }
+
+    /* Selected employees table container */
+    .selected-employees-table-container {
+        max-height: 300px;
+        overflow-y: auto;
+        border: 1px solid #dee2e6;
+        border-radius: 4px;
+        margin-top: 10px;
+    }
+
+    /* Remove employee button styling */
+    .remove-employee-btn {
+        background-color: #dc3545;
+        color: white;
+        border: none;
+        border-radius: 50%;
+        width: 30px;
+        height: 30px;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 12px;
+        transition: background-color 0.2s;
+    }
+
+    .remove-employee-btn:hover {
+        background-color: #c82333;
+        transform: scale(1.1);
+    }
+
+    .remove-employee-btn i {
+        pointer-events: none;
+    }
+
+    /* Empty selection message */
+    .empty-selection-message {
+        border: 1px solid #dee2e6;
+        border-radius: 4px;
+        margin-top: 10px;
+    }
+
+    .empty-selection-message p {
+        margin: 0;
+        font-size: 13px;
+    }
+</style>
+
+<!-- JavaScript Functions -->
+<script>
+    // Function to toggle the settings menu
+    function toggleSettingsMenu(courseid) {
+        var menu = document.getElementById('settings-menu-' + courseid);
+        if (menu.style.display === 'block') {
+            menu.style.display = 'none';
+        } else {
+            // Close any open menus
+            var menus = document.getElementsByClassName('settings-menu');
+            for (var i = 0; i < menus.length; i++) {
+                menus[i].style.display = 'none';
+            }
+            menu.style.display = 'block';
+        }
+    }
+
+    // Close the settings menu when clicking outside
+    window.onclick = function(event) {
+        if (!event.target.matches('.settings-btn') && !event.target.closest('.settings-menu')) {
+            var menus = document.getElementsByClassName('settings-menu');
+            for (var i = 0; i < menus.length; i++) {
+                menus[i].style.display = 'none';
+            }
+        }
+
+        // Close the download menu if clicked outside
+        if (!event.target.matches('#download-button') && !event.target.closest('#download-menu')) {
+            var menu = document.getElementById('download-menu');
+            if (menu.style.display === 'block') {
+                menu.style.display = 'none';
+            }
+        }
+    };
+
+    // Function to show the place input field for editing
+    function editPlace(courseid) {
+        // Hide the place text
+        document.getElementById('place-text-' + courseid).style.display = 'none';
+        // Show the place input form
+        document.getElementById('place-form-container-' + courseid).style.display = 'inline';
+        // Close the settings menu after clicking
+        var menu = document.getElementById('settings-menu-' + courseid);
+        if (menu) {
+            menu.style.display = 'none';
+        }
+    }
+
+    // Function to cancel editing the place
+    function cancelEditPlace(courseid) {
+        // Hide the place input form
+        document.getElementById('place-form-container-' + courseid).style.display = 'none';
+        // Show the place text
+        document.getElementById('place-text-' + courseid).style.display = 'inline';
+    }
+
+    // Function to clear the place input field
+    function clearPlaceInput(courseid) {
+        var input = document.querySelector('#place-form-' + courseid + ' input[name="place"]');
+        if (input) {
+            input.value = '';
+        }
+    }
+
+    // Pagination Functionality
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialize pagination
+        var table = document.getElementById('annualplan-courses-table');
+        var tbody = table.querySelector('tbody');
+        var rows = tbody ? tbody.querySelectorAll('tr') : table.querySelectorAll('tr:not(:first-child)');
+        var rowsPerPage = 20; // Number of rows per page
+        var currentPage = 1;
+        var totalPages = Math.ceil(rows.length / rowsPerPage);
+
+        function displayRows() {
+            var start = (currentPage - 1) * rowsPerPage;
+            var end = start + rowsPerPage;
+            for (var i = 0; i < rows.length; i++) {
+                if (i >= start && i < end) {
+                    rows[i].style.display = '';
+                } else {
+                    rows[i].style.display = 'none';
+                }
+            }
+        }
+
+        function setupPagination() {
+            var paginationContainer = document.getElementById('pagination');
+            if (!paginationContainer) {
+                paginationContainer = document.createElement('div');
+                paginationContainer.id = 'pagination';
+                table.parentNode.insertBefore(paginationContainer, table.nextSibling);
+            }
+            paginationContainer.innerHTML = '';
+
+            // Previous Button
+            var prevButton = document.createElement('button');
+            prevButton.textContent = 'السابق';
+            prevButton.disabled = currentPage === 1;
+            prevButton.addEventListener('click', function() {
+                if (currentPage > 1) {
+                    currentPage--;
+                    displayRows();
+                    setupPagination();
+                    scrollToTop();
+                }
+            });
+            paginationContainer.appendChild(prevButton);
+
+            // Page Numbers
+            for (var i = 1; i <= totalPages; i++) {
+                var pageButton = document.createElement('button');
+                pageButton.textContent = i;
+                if (i === currentPage) {
+                    pageButton.disabled = true;
+                }
+                (function(page) {
+                    pageButton.addEventListener('click', function() {
+                        currentPage = page;
+                        displayRows();
+                        setupPagination();
+                        scrollToTop();
+                    });
+                })(i);
+                paginationContainer.appendChild(pageButton);
+            }
+
+            // Next Button
+            var nextButton = document.createElement('button');
+            nextButton.textContent = 'التالي';
+            nextButton.disabled = currentPage === totalPages;
+            nextButton.addEventListener('click', function() {
+                if (currentPage < totalPages) {
+                    currentPage++;
+                    displayRows();
+                    setupPagination();
+                    scrollToTop();
+                }
+            });
+            paginationContainer.appendChild(nextButton);
+        }
+
+        // Function to scroll to the top of the page
+        function scrollToTop() {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // Initialize the table
+        displayRows();
+        setupPagination();
+    });
+
+    // Function to escape CSV values
+    function csvEscape(text) {
+        if (text.includes('"') || text.includes(',') || text.includes('\n')) {
+            text = text.replace(/"/g, '""'); // Escape double quotes by doubling them
+            text = '"' + text + '"';
+        }
+        return text;
+    }
+
+    // Function to get table data
+    function getTableData() {
+        var table = document.getElementById('annualplan-courses-table');
+        var data = [];
+        var rows = table.querySelectorAll('tr');
+
+        // Loop through each row
+        for (var i = 0; i < rows.length; i++) {
+            var row = [], cols;
+
+            // For headers, use 'th', for data rows, use 'td'
+            if (i == 0) {
+                cols = rows[i].querySelectorAll('th');
+            } else {
+                cols = rows[i].querySelectorAll('td');
+            }
+
+            // Loop through each column
+            for (var j = 0; j < cols.length; j++) {
+                var cell = cols[j];
+                var text = '';
+
+                // Handle cells differently based on their content
+                // If cell contains a select element
+                var select = cell.querySelector('select');
+                if (select) {
+                    text = select.options[select.selectedIndex].text.trim();
+                } else {
+                    // If cell contains a checkbox
+                    var checkbox = cell.querySelector('input[type="checkbox"]');
+                    if (checkbox) {
+                        text = checkbox.checked ? 'معتمد' : 'غير معتمد';
+                    } else {
+                        // If cell contains plain text or other elements
+                        text = cell.innerText.trim();
+                    }
+                }
+
+                // Clean the text
+                text = text.replace(/(\r\n|\n|\r)/gm, " ").trim();
+
+                // For CSV, escape the text
+                text = csvEscape(text);
+
+                row.push(text);
+            }
+
+            data.push(row);
+        }
+
+        return data;
+    }
+
+    // Function to download CSV
+    function downloadCSV() {
+        var data = getTableData();
+        var csvContent = data.map(e => e.join(",")).join("\n");
+
+        var blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        var link = document.createElement("a");
+        if (link.download !== undefined) {
+            var url = URL.createObjectURL(blob);
+            link.setAttribute("href", url);
+            link.setAttribute("download", "الخطة التدريبية.csv");
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        } else {
+            alert('Your browser does not support downloading files via JavaScript. Please update your browser.');
+        }
+    }
+
+    // Function to download Excel
+    function downloadExcel() {
+        var data = getTableData();
+        // Remove CSV escaping for Excel
+        data = data.map(row => row.map(cell => cell.replace(/^"|"$/g, '').replace(/""/g, '"')));
+        /* Convert data array to worksheet */
+        var ws = XLSX.utils.aoa_to_sheet(data);
+        var wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, "Sheet1");
+
+        /* Generate Excel file and trigger download */
+        XLSX.writeFile(wb, 'الخطة التدريبية.xlsx');
+    }
+
+    // Event listener for download menu
+    document.getElementById('download-menu').addEventListener('click', function(event) {
+        event.preventDefault();
+        var downloadType = event.target.getAttribute('data-type');
+
+        if (downloadType === 'csv') {
+            downloadCSV();
+        } else if (downloadType === 'excel') {
+            downloadExcel();
+        }
+    });
+
+    // Toggle the download dropdown menu
+    document.getElementById('download-button').addEventListener('click', function() {
+        var menu = document.getElementById('download-menu');
+        menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
+    });
+
+    // Beneficiaries Dialog Functions
+    var currentCourseId = '';
+    var currentCourseDate = '';
+    var currentAnnualPlanId = '';
+    var allEmployees = {}; // Simple format for backward compatibility
+    var allEmployeesData = {}; // Detailed format for table display
+    var selectedEmployees = {};
+    
+    // AJAX URLs from backend
+    var ajaxUrls = {
+        getEmployees: '{{ajax_urls.get_employees}}',
+        getBeneficiaries: '{{ajax_urls.get_beneficiaries}}',
+        saveBeneficiaries: '{{ajax_urls.save_beneficiaries}}',
+        getRoles: M.cfg.wwwroot + '/local/annualplans/ajax/get_roles.php'
+    };
+    
+    // Role management variables
+    var availableRoles = [];
+    var employeeRoles = {};
+    var hasRoles = false;
+
+    // Function to open the beneficiaries dialog
+    window.openBeneficiariesDialog = function(courseId, courseDate, annualPlanId, isApproved) {
+        // Check if course is approved
+        if (isApproved === true) {
+            alert('لا يمكن تعديل المنتسبين - تم اعتماد الدورة بالفعل');
+            return;
+        }
+        
+        // Validate parameters
+        if (!courseId || !courseDate || !annualPlanId) {
+            console.error('Invalid parameters for beneficiaries dialog:', courseId, courseDate, annualPlanId);
+            alert('خطأ في فتح نافذة المنتسبين. يرجى المحاولة مرة أخرى.');
+            return;
+        }
+        
+        currentCourseId = String(courseId); // Ensure it's a string
+        currentCourseDate = parseInt(courseDate); // Ensure it's a number
+        currentAnnualPlanId = parseInt(annualPlanId); // Ensure it's a number
+        
+        // Reset selections to ensure clean state
+        selectedEmployees = {};
+        employeeRoles = {};
+        allEmployees = {};
+        allEmployeesData = {};
+        
+        // Clear any previous content
+        document.getElementById('employeesTableContainer').innerHTML = '';
+        document.getElementById('selectedEmployeesTableContainer').innerHTML = '';
+        document.getElementById('employeeSearch').value = '';
+        
+        // Reset radio buttons to default
+        var employeesRadio = document.querySelector('input[name="tableSource"][value="employees"]');
+        if (employeesRadio) {
+            employeesRadio.checked = true;
+        }
+        
+        // Show the modal
+        document.getElementById('beneficiariesModal').style.display = 'flex';
+        
+        // Load roles first, then employees and beneficiaries
+        loadRolesAndEmployees();
+    };
+
+    // Function to close the beneficiaries dialog
+    window.closeBeneficiariesDialog = function() {
+        document.getElementById('beneficiariesModal').style.display = 'none';
+        // Clear search
+        document.getElementById('employeeSearch').value = '';
+    };
+
+    // Function to load available roles
+    function loadAvailableRoles() {
+        return new Promise(function(resolve) {
+            var xhr = new XMLHttpRequest();
+            xhr.open('GET', ajaxUrls.getRoles, true);
+            xhr.onreadystatechange = function() {
+                if (xhr.readyState === 4) {
+                    if (xhr.status === 200) {
+                        try {
+                            availableRoles = JSON.parse(xhr.responseText);
+                            hasRoles = availableRoles.length > 0;
+                            console.log('Available roles:', availableRoles);
+                            resolve();
+                        } catch (e) {
+                            console.error('Error parsing roles:', e);
+                            availableRoles = [];
+                            hasRoles = false;
+                            resolve();
+                        }
+                    } else {
+                        console.error('Error loading roles:', xhr.status);
+                        availableRoles = [];
+                        hasRoles = false;
+                        resolve();
+                    }
+                }
+            };
+            xhr.send();
+        });
+    }
+
+    // Function to load roles, then employees and beneficiaries
+    function loadRolesAndEmployees() {
+        loadAvailableRoles().then(function() {
+            loadEmployeesAndBeneficiaries();
+        });
+    }
+
+    // Function to load employees and then beneficiaries in sequence
+    function loadEmployeesAndBeneficiaries() {
+        console.log('Loading employees and beneficiaries...');
+        var xhr = new XMLHttpRequest();
+        xhr.open('GET', ajaxUrls.getEmployees, true);
+        xhr.onreadystatechange = function() {
+            if (xhr.readyState === 4) {
+                if (xhr.status === 200) {
+                    try {
+                        allEmployees = JSON.parse(xhr.responseText);
+                        console.log('Loaded employees:', Object.keys(allEmployees).length, 'employees');
+                        
+                        // Parse employee data into detailed format for table display
+                        allEmployeesData = {};
+                        for (var identifier in allEmployees) {
+                            var displayText = allEmployees[identifier];
+                            var emp = parseEmployeeDisplayText(identifier, displayText);
+                            allEmployeesData[identifier] = emp;
+                        }
+                        
+                        if (Object.keys(allEmployees).length === 0) {
+                            console.warn('No employees found in Oracle database');
+                            alert('لم يتم العثور على موظفين في قاعدة البيانات');
+                        }
+                        
+                        displayEmployees();
+                        
+                        // Now load existing beneficiaries after employees are loaded
+                        loadExistingBeneficiaries();
+                        
+                    } catch (e) {
+                        console.error('Error parsing employees data:', e);
+                        console.error('Response text:', xhr.responseText);
+                        alert('خطأ في تحليل بيانات الموظفين: ' + e.message);
+                    }
+                } else {
+                    console.error('HTTP Error:', xhr.status, xhr.statusText);
+                    alert('خطأ في الشبكة: ' + xhr.status + ' - ' + xhr.statusText);
+                }
+            }
+        };
+        xhr.send();
+    }
+
+    // Function to load employees from the Oracle database
+    function loadEmployees() {
+        var xhr = new XMLHttpRequest();
+        xhr.open('GET', ajaxUrls.getEmployees, true);
+        xhr.onreadystatechange = function() {
+            if (xhr.readyState === 4) {
+                if (xhr.status === 200) {
+                                    try {
+                    allEmployees = JSON.parse(xhr.responseText);
+                    console.log('Loaded employees:', Object.keys(allEmployees).length, 'employees');
+                    
+                    // Parse employee data into detailed format for table display
+                    allEmployeesData = {};
+                    for (var identifier in allEmployees) {
+                        var displayText = allEmployees[identifier];
+                        var emp = parseEmployeeDisplayText(identifier, displayText);
+                        allEmployeesData[identifier] = emp;
+                    }
+                    
+                    if (Object.keys(allEmployees).length === 0) {
+                        console.warn('No employees found in Oracle database');
+                        alert('لم يتم العثور على موظفين في قاعدة البيانات');
+                    }
+                    
+                    displayEmployees();
+                } catch (e) {
+                    console.error('Error parsing employees data:', e);
+                    console.error('Response text:', xhr.responseText);
+                    alert('خطأ في تحليل بيانات الموظفين: ' + e.message);
+                }
+                } else {
+                    console.error('HTTP Error:', xhr.status, xhr.statusText);
+                    alert('خطأ في الشبكة: ' + xhr.status + ' - ' + xhr.statusText);
+                }
+            }
+        };
+        xhr.send();
+    }
+
+    // Function to load existing beneficiaries for the course
+    function loadExistingBeneficiaries() {
+        console.log('Loading existing beneficiaries for course:', currentCourseId, currentCourseDate, currentAnnualPlanId);
+        var xhr = new XMLHttpRequest();
+        xhr.open('GET', ajaxUrls.getBeneficiaries + '?courseid=' + 
+                  encodeURIComponent(currentCourseId) + '&coursedate=' + 
+                  currentCourseDate + '&annualplanid=' + currentAnnualPlanId, true);
+        xhr.onreadystatechange = function() {
+            if (xhr.readyState === 4) {
+                if (xhr.status === 200) {
+                    try {
+                        var response = JSON.parse(xhr.responseText);
+                        console.log('Loaded existing beneficiaries:', response);
+                        
+                        // Reset selectedEmployees and roles to ensure clean state
+                        selectedEmployees = {};
+                        if (hasRoles) {
+                            employeeRoles = {};
+                        }
+                        
+                        // Handle both old format (direct object) and new format (with employees/roles)
+                        var existingBeneficiaries, existingRoles;
+                        if (response.employees && response.roles) {
+                            // New format
+                            existingBeneficiaries = response.employees;
+                            existingRoles = response.roles;
+                        } else {
+                            // Old format - treat response as direct beneficiaries list
+                            existingBeneficiaries = response;
+                            existingRoles = {};
+                        }
+                        
+                        // Safely copy the existing beneficiaries
+                        if (existingBeneficiaries && typeof existingBeneficiaries === 'object') {
+                            for (var key in existingBeneficiaries) {
+                                if (existingBeneficiaries.hasOwnProperty(key)) {
+                                    // Ensure we only store string values to prevent JSON issues
+                                    selectedEmployees[key] = String(existingBeneficiaries[key]);
+                                }
+                            }
+                        }
+                        
+                        // Safely copy the existing roles if roles are available
+                        if (hasRoles && existingRoles && typeof existingRoles === 'object') {
+                            for (var key in existingRoles) {
+                                if (existingRoles.hasOwnProperty(key)) {
+                                    employeeRoles[key] = parseInt(existingRoles[key]);
+                                }
+                            }
+                        }
+                        
+                        console.log('Selected employees after loading:', selectedEmployees);
+                        if (hasRoles) {
+                            console.log('Selected roles after loading:', employeeRoles);
+                        }
+                        console.log('AllEmployeesData available:', Object.keys(allEmployeesData).length, 'employees');
+                        
+                        updateSelectedEmployeesDisplay();
+                        // Checkboxes will be updated when employees are displayed through search
+                        
+                    } catch (e) {
+                        console.error('Error parsing beneficiaries data:', e);
+                        selectedEmployees = {}; // Reset to empty object on error
+                        updateSelectedEmployeesDisplay(); // Show empty state
+                    }
+                } else {
+                    console.error('Error loading beneficiaries:', xhr.status, xhr.statusText);
+                    selectedEmployees = {};
+                    updateSelectedEmployeesDisplay(); // Show empty state
+                }
+            }
+        };
+        xhr.send();
+    }
+
+    // Function to parse employee display text into detailed object
+    function parseEmployeeDisplayText(identifier, displayText) {
+        var emp = {
+            identifier: identifier,
+            fullname: '',
+            pf_number: null,
+            civil_number: null,
+            source_type: 'unknown'
+        };
+        
+        // Parse different formats:
+        // "PF: 123456 - John Doe (Civil: 987654)" - Employee with personal details
+        // "PF: 123456 - John Doe" - Employee only
+        // "Civil: 987654 - Jane Smith" - Personal details only
+        
+        if (displayText.startsWith('PF:')) {
+            emp.source_type = 'employee';
+            // Extract PF number
+            var pfMatch = displayText.match(/PF:\s*(\S+)/);
+            if (pfMatch) {
+                emp.pf_number = pfMatch[1];
+            }
+            
+            // Extract name (between " - " and either " (Civil:" or end of string)
+            var nameMatch = displayText.match(/ - ([^(]+)(?:\s*\(Civil:|$)/);
+            if (nameMatch) {
+                emp.fullname = nameMatch[1].trim();
+            }
+            
+            // Extract civil number if present
+            var civilMatch = displayText.match(/\(Civil:\s*([^)]+)\)/);
+            if (civilMatch) {
+                emp.civil_number = civilMatch[1];
+            }
+        } else if (displayText.startsWith('Civil:')) {
+            emp.source_type = 'personal';
+            // Extract civil number
+            var civilMatch = displayText.match(/Civil:\s*(\S+)/);
+            if (civilMatch) {
+                emp.civil_number = civilMatch[1];
+            }
+            
+            // Extract name (after " - ")
+            var nameMatch = displayText.match(/ - (.+)$/);
+            if (nameMatch) {
+                emp.fullname = nameMatch[1].trim();
+            }
+        }
+        
+        return emp;
+    }
+
+    // Function to create role dropdown
+    function createRoleDropdown(identifier) {
+        if (!hasRoles) return null;
+        
+        var select = document.createElement('select');
+        select.className = 'role-select';
+        select.style.width = '100%';
+        select.style.padding = '4px';
+        select.style.fontSize = '12px';
+        select.setAttribute('data-identifier', identifier);
+        select.onchange = function() {
+            var value = parseInt(this.value);
+            if (value) {
+                employeeRoles[identifier] = value;
+            } else {
+                delete employeeRoles[identifier];
+            }
+        };
+        
+        // Add default option
+        var defaultOption = document.createElement('option');
+        defaultOption.value = '';
+        defaultOption.textContent = 'اختر الدور';
+        select.appendChild(defaultOption);
+        
+        // Add available roles
+        var selectedRoleId = employeeRoles[identifier];
+        for (var i = 0; i < availableRoles.length; i++) {
+            var role = availableRoles[i];
+            var option = document.createElement('option');
+            option.value = role.id;
+            option.textContent = role.name;
+            if (selectedRoleId && role.id == selectedRoleId) {
+                option.selected = true;
+            }
+            select.appendChild(option);
+        }
+        
+        return select;
+    }
+
+    // Function to display employees in the table (initially empty)
+    function displayEmployees() {
+        var tableContainer = document.getElementById('employeesTableContainer');
+        tableContainer.innerHTML = '';
+        
+        // Show instruction message
+        var instructionMessage = document.createElement('div');
+        instructionMessage.className = 'search-instruction-message';
+        instructionMessage.innerHTML = '<p style="text-align: center; color: #999; font-style: italic; padding: 20px;">' +
+                                     'اختر مصدر البيانات واكتب في مربع البحث للعثور على الموظفين' +
+                                     '</p>';
+        tableContainer.appendChild(instructionMessage);
+    }
+
+    // Function to create employee table
+    function createEmployeeTable(employees) {
+        var table = document.createElement('table');
+        table.className = 'employees-table';
+        
+        // Create header
+        var thead = document.createElement('thead');
+        var headerRow = document.createElement('tr');
+        var headerHTML = '<th style="width: 50px;">اختيار</th>' +
+                        '<th>الاسم</th>' +
+                        '<th>الرقم المدني</th>' +
+                        '<th>رقم الملف الشخصي</th>' +
+                        '<th>المصدر</th>';
+        
+        if (hasRoles) {
+            headerHTML += '<th style="width: 150px;">الدور</th>';
+        }
+        
+        headerRow.innerHTML = headerHTML;
+        thead.appendChild(headerRow);
+        table.appendChild(thead);
+        
+        // Create body
+        var tbody = document.createElement('tbody');
+        
+        for (var i = 0; i < employees.length; i++) {
+            var emp = employees[i];
+            var row = document.createElement('tr');
+            
+            var checkboxCell = document.createElement('td');
+            checkboxCell.innerHTML = '<input type="checkbox" class="employee-checkbox" id="emp_' + emp.identifier + '" ' +
+                                   'data-identifier="' + emp.identifier + '" ' +
+                                   'onchange="toggleEmployee(\'' + emp.identifier + '\', \'' + emp.fullname + '\')">';
+            
+            var nameCell = document.createElement('td');
+            nameCell.textContent = emp.fullname;
+            
+            var civilCell = document.createElement('td');
+            civilCell.textContent = emp.civil_number || '-';
+            
+            var pfCell = document.createElement('td');
+            pfCell.textContent = emp.pf_number || '-';
+            
+            var sourceCell = document.createElement('td');
+            sourceCell.textContent = emp.source_type === 'employee' ? 'موظفين' : 'بيانات شخصية';
+            sourceCell.className = emp.source_type === 'employee' ? 'source-employee' : 'source-personal';
+            
+            row.appendChild(checkboxCell);
+            row.appendChild(nameCell);
+            row.appendChild(civilCell);
+            row.appendChild(pfCell);
+            row.appendChild(sourceCell);
+            
+            if (hasRoles) {
+                var roleCell = document.createElement('td');
+                var roleDropdown = createRoleDropdown(emp.identifier);
+                if (roleDropdown) {
+                    roleCell.appendChild(roleDropdown);
+                }
+                row.appendChild(roleCell);
+            }
+            
+            tbody.appendChild(row);
+        }
+        
+        table.appendChild(tbody);
+        return table;
+    }
+
+    // Function to filter employees based on search and table selection
+    window.filterEmployees = function() {
+        var searchTerm = document.getElementById('employeeSearch').value.toLowerCase();
+        var tableContainer = document.getElementById('employeesTableContainer');
+        var selectedSource = document.querySelector('input[name="tableSource"]:checked').value;
+        
+        if (searchTerm.length === 0) {
+            // If search is empty, show instruction message
+            displayEmployees();
+            return;
+        }
+        
+        if (searchTerm.length < 2) {
+            // Show message to type more characters
+            tableContainer.innerHTML = '';
+            var typeMoreMessage = document.createElement('div');
+            typeMoreMessage.className = 'search-instruction-message';
+            typeMoreMessage.innerHTML = '<p style="text-align: center; color: #999; font-style: italic; padding: 20px;">' +
+                                      'اكتب حرفين على الأقل للبحث' +
+                                      '</p>';
+            tableContainer.appendChild(typeMoreMessage);
+            return;
+        }
+        
+        // Filter employees based on search term and selected source
+        var filteredEmployees = [];
+        var maxResults = 15; // Show up to 15 results in table
+        
+        for (var identifier in allEmployeesData) {
+            if (filteredEmployees.length >= maxResults) {
+                break;
+            }
+            
+            var emp = allEmployeesData[identifier];
+            
+            // Filter by source
+            if (selectedSource === 'employees' && emp.source_type !== 'employee') continue;
+            if (selectedSource === 'personal' && emp.source_type !== 'personal') continue;
+            // 'both' includes all sources
+            
+            // Filter by search term (search in name, pf_number, and civil_number)
+            var searchableText = (emp.fullname + ' ' + (emp.pf_number || '') + ' ' + (emp.civil_number || '')).toLowerCase();
+            if (searchableText.includes(searchTerm)) {
+                filteredEmployees.push(emp);
+            }
+        }
+        
+        // Clear container and show results
+        tableContainer.innerHTML = '';
+        
+        if (filteredEmployees.length === 0) {
+            var noMatchMessage = document.createElement('div');
+            noMatchMessage.className = 'no-match-message';
+            noMatchMessage.innerHTML = '<p style="text-align: center; color: #999; font-style: italic; padding: 20px;">' +
+                                     'لم يتم العثور على نتائج مطابقة للبحث: "' + searchTerm + '"' +
+                                     '</p>';
+            tableContainer.appendChild(noMatchMessage);
+        } else {
+            var table = createEmployeeTable(filteredEmployees);
+            tableContainer.appendChild(table);
+            
+            // Update checkboxes for selected employees after a small delay to ensure DOM is ready
+            setTimeout(function() {
+                updateEmployeeCheckboxes();
+            }, 100);
+        }
+    };
+
+    // Function to toggle employee selection
+    window.toggleEmployee = function(identifier, fullName) {
+        if (selectedEmployees[identifier]) {
+            delete selectedEmployees[identifier];
+            if (hasRoles) {
+                delete employeeRoles[identifier];
+            }
+        } else {
+            // Ensure we only store clean string values
+            if (typeof identifier === 'string' && typeof fullName === 'string' && 
+                identifier.length > 0 && identifier.length <= 50 && 
+                fullName.length > 0 && fullName.length <= 255) {
+                selectedEmployees[identifier] = fullName;
+            } else {
+                console.warn('Invalid employee data:', identifier, fullName);
+                alert('بيانات الموظف غير صالحة. يرجى المحاولة مرة أخرى.');
+                return;
+            }
+        }
+        updateSelectedEmployeesDisplay();
+    };
+
+    // Function to create selected employees table
+    function createSelectedEmployeesTable(selectedEmployeesList) {
+        var table = document.createElement('table');
+        table.className = 'selected-employees-table';
+        
+        // Create header
+        var thead = document.createElement('thead');
+        var headerRow = document.createElement('tr');
+        var headerHTML = '<th>الاسم</th>' +
+                        '<th>الرقم المدني</th>' +
+                        '<th>رقم الملف الشخصي</th>' +
+                        '<th>المصدر</th>';
+        
+        if (hasRoles) {
+            headerHTML += '<th>الدور</th>';
+        }
+        
+        headerHTML += '<th style="width: 60px;">إزالة</th>';
+        
+        headerRow.innerHTML = headerHTML;
+        thead.appendChild(headerRow);
+        table.appendChild(thead);
+        
+        // Create body
+        var tbody = document.createElement('tbody');
+        
+        for (var i = 0; i < selectedEmployeesList.length; i++) {
+            var emp = selectedEmployeesList[i];
+            var row = document.createElement('tr');
+            
+            var nameCell = document.createElement('td');
+            nameCell.textContent = emp.fullname;
+            
+            var civilCell = document.createElement('td');
+            civilCell.textContent = emp.civil_number || '-';
+            
+            var pfCell = document.createElement('td');
+            pfCell.textContent = emp.pf_number || '-';
+            
+            var sourceCell = document.createElement('td');
+            sourceCell.textContent = emp.source_type === 'employee' ? 'موظفين' : 'بيانات شخصية';
+            sourceCell.className = emp.source_type === 'employee' ? 'source-employee' : 'source-personal';
+            
+            row.appendChild(nameCell);
+            row.appendChild(civilCell);
+            row.appendChild(pfCell);
+            row.appendChild(sourceCell);
+            
+            if (hasRoles) {
+                var roleCell = document.createElement('td');
+                var roleName = 'غير محدد';
+                if (employeeRoles[emp.identifier]) {
+                    var role = availableRoles.find(function(r) { return r.id == employeeRoles[emp.identifier]; });
+                    if (role) {
+                        roleName = role.name;
+                    }
+                }
+                roleCell.textContent = roleName;
+                row.appendChild(roleCell);
+            }
+            
+            var removeCell = document.createElement('td');
+            removeCell.innerHTML = '<button type="button" class="remove-employee-btn" onclick="removeEmployee(\'' + emp.identifier + '\')" title="إزالة">' +
+                                  '<i class="fa fa-times" aria-hidden="true"></i>' +
+                                  '</button>';
+            
+            row.appendChild(removeCell);
+            
+            tbody.appendChild(row);
+        }
+        
+        table.appendChild(tbody);
+        return table;
+    }
+
+    // Function to update selected employees display
+    function updateSelectedEmployeesDisplay() {
+        var tableContainer = document.getElementById('selectedEmployeesTableContainer');
+        tableContainer.innerHTML = '';
+        
+        if (Object.keys(selectedEmployees).length === 0) {
+            var emptyMessage = document.createElement('div');
+            emptyMessage.className = 'empty-selection-message';
+            emptyMessage.innerHTML = '<p style="text-align: center; color: #999; font-style: italic; padding: 15px;">' +
+                                   'لم يتم اختيار أي منتسبين بعد' +
+                                   '</p>';
+            tableContainer.appendChild(emptyMessage);
+            return;
+        }
+        
+        // Convert selected employees to detailed format
+        var selectedEmployeesList = [];
+        for (var identifier in selectedEmployees) {
+            var employeeData = null;
+            
+            // First try direct lookup
+            if (allEmployeesData[identifier]) {
+                employeeData = allEmployeesData[identifier];
+            } else {
+                // Search through allEmployeesData to find matching employee
+                for (var empId in allEmployeesData) {
+                    var emp = allEmployeesData[empId];
+                    // Check if the identifier matches PF number or civil number
+                    if ((emp.pf_number && emp.pf_number === identifier) || 
+                        (emp.civil_number && emp.civil_number === identifier) ||
+                        (emp.identifier === identifier)) {
+                        employeeData = emp;
+                        break;
+                    }
+                }
+            }
+            
+            if (employeeData) {
+                selectedEmployeesList.push(employeeData);
+            } else {
+                // Enhanced fallback - try to determine type from identifier format or context
+                var fallbackData = {
+                    identifier: identifier,
+                    fullname: selectedEmployees[identifier],
+                    pf_number: null,
+                    civil_number: null,
+                    source_type: 'unknown'
+                };
+                
+                // If identifier is all digits and reasonable length, it could be PF or civil
+                if (/^\d+$/.test(identifier)) {
+                    if (identifier.length <= 8) {
+                        // Likely PF number
+                        fallbackData.pf_number = identifier;
+                        fallbackData.source_type = 'employee';
+                    } else {
+                        // Likely civil number
+                        fallbackData.civil_number = identifier;
+                        fallbackData.source_type = 'personal';
+                    }
+                }
+                
+                console.log('Using fallback data for identifier:', identifier, fallbackData);
+                selectedEmployeesList.push(fallbackData);
+            }
+        }
+        
+        var table = createSelectedEmployeesTable(selectedEmployeesList);
+        tableContainer.appendChild(table);
+    }
+
+    // Function to remove an employee from selection
+    window.removeEmployee = function(identifier) {
+        delete selectedEmployees[identifier];
+        if (hasRoles) {
+            delete employeeRoles[identifier];
+        }
+        updateSelectedEmployeesDisplay();
+        updateEmployeeCheckboxes();
+    };
+
+    // Function to update employee checkboxes based on selection
+    function updateEmployeeCheckboxes() {
+        // Only update checkboxes that exist in the DOM (now in table format)
+        var checkboxes = document.querySelectorAll('.employee-checkbox');
+        checkboxes.forEach(function(checkbox) {
+            var identifier = checkbox.getAttribute('data-identifier');
+            var isSelected = false;
+            
+            // Check if this employee is selected (direct or by PF/civil number)
+            if (selectedEmployees[identifier]) {
+                isSelected = true;
+            } else {
+                // Check if selected by PF number or civil number
+                if (allEmployeesData[identifier]) {
+                    var emp = allEmployeesData[identifier];
+                    if ((emp.pf_number && selectedEmployees[emp.pf_number]) ||
+                        (emp.civil_number && selectedEmployees[emp.civil_number])) {
+                        isSelected = true;
+                    }
+                }
+            }
+            
+            checkbox.checked = isSelected;
+        });
+    }
+
+    // Function to refresh the selected employees display (useful for debugging)
+    window.refreshSelectedEmployeesDisplay = function() {
+        console.log('Refreshing selected employees display...');
+        console.log('Current selectedEmployees:', selectedEmployees);
+        console.log('Current allEmployeesData keys:', Object.keys(allEmployeesData));
+        updateSelectedEmployeesDisplay();
+    };
+
+    // Function to save beneficiaries
+    window.saveBeneficiaries = function() {
+        try {
+            // Check role validation if roles are available
+            if (hasRoles) {
+                var missingRoles = [];
+                for (var key in selectedEmployees) {
+                    if (!employeeRoles[key]) {
+                        missingRoles.push(selectedEmployees[key]);
+                    }
+                }
+                if (missingRoles.length > 0) {
+                    alert('يرجى تحديد دور لجميع المنتسبين المختارين:\n' + missingRoles.join(', '));
+                    return;
+                }
+            }
+            
+            // Clean and validate selectedEmployees before sending
+            var cleanedEmployees = {};
+            var cleanedRoles = {};
+            var employeeCount = 0;
+            
+            for (var key in selectedEmployees) {
+                if (selectedEmployees.hasOwnProperty(key)) {
+                    var value = selectedEmployees[key];
+                    // Ensure both key and value are strings and not too long
+                    if (typeof key === 'string' && typeof value === 'string' && 
+                        key.length > 0 && key.length <= 50 && 
+                        value.length > 0 && value.length <= 255) {
+                        cleanedEmployees[key] = value;
+                        if (hasRoles && employeeRoles[key]) {
+                            cleanedRoles[key] = employeeRoles[key];
+                        }
+                        employeeCount++;
+                    } else {
+                        console.warn('Skipping invalid employee data:', key, value);
+                    }
+                }
+            }
+            
+            console.log('Cleaned employees count:', employeeCount);
+            console.log('Selected employees to save:', cleanedEmployees);
+            
+            // Try to stringify the cleaned data
+            var beneficiariesJson;
+            try {
+                beneficiariesJson = JSON.stringify(cleanedEmployees);
+            } catch (stringifyError) {
+                console.error('JSON stringify error:', stringifyError);
+                alert('خطأ في معالجة بيانات المنتسبين. يرجى المحاولة مرة أخرى.');
+                return;
+            }
+            
+            // Check if the JSON string is too large
+            if (beneficiariesJson.length > 65000) {
+                alert('بيانات المنتسبين كبيرة جداً. يرجى تقليل عدد المنتسبين المختارين.');
+                return;
+            }
+            
+            var xhr = new XMLHttpRequest();
+            xhr.open('POST', ajaxUrls.saveBeneficiaries, true);
+            xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+            
+            var postData = 'courseid=' + encodeURIComponent(currentCourseId) +
+                          '&coursedate=' + currentCourseDate +
+                          '&annualplanid=' + currentAnnualPlanId +
+                          '&beneficiaries=' + encodeURIComponent(beneficiariesJson);
+            
+            // Add roles data if available
+            if (hasRoles && Object.keys(cleanedRoles).length > 0) {
+                var rolesJson = JSON.stringify(cleanedRoles);
+                postData += '&roles=' + encodeURIComponent(rolesJson);
+            }
+            
+            xhr.onreadystatechange = function() {
+                if (xhr.readyState === 4) {
+                    if (xhr.status === 200) {
+                        try {
+                            var response = JSON.parse(xhr.responseText);
+                            console.log('Save response:', response);
+                            
+                            if (response.success) {
+                                // Update the beneficiaries count in the table
+                                var countElement = document.getElementById('beneficiaries-count-' + currentCourseId + '-' + currentCourseDate);
+                                if (countElement) {
+                                    countElement.textContent = response.count;
+                                }
+                                closeBeneficiariesDialog();
+                                alert('تم حفظ المنتسبين بنجاح. عدد المنتسبين: ' + response.count);
+                            } else {
+                                var errorMsg = 'خطأ في حفظ المنتسبين';
+                                if (response.message) {
+                                    errorMsg += ': ' + response.message;
+                                }
+                                if (response.error) {
+                                    errorMsg += '\nتفاصيل الخطأ: ' + response.error;
+                                }
+                                if (response.errors && response.errors.length > 0) {
+                                    errorMsg += '\nأخطاء التفاصيل:\n' + response.errors.join('\n');
+                                }
+                                console.error('Save failed:', response);
+                                alert(errorMsg);
+                            }
+                        } catch (e) {
+                            console.error('Error parsing save response:', e);
+                            console.error('Response text:', xhr.responseText);
+                            alert('خطأ في تحليل استجابة الخادم: ' + e.message);
+                        }
+                    } else {
+                        console.error('HTTP Error:', xhr.status, xhr.statusText);
+                        alert('خطأ في الشبكة: ' + xhr.status + ' - ' + xhr.statusText);
+                    }
+                }
+            };
+            
+            xhr.send(postData);
+            
+        } catch (error) {
+            console.error('Error in saveBeneficiaries function:', error);
+            alert('حدث خطأ غير متوقع: ' + error.message);
+        }
+    };
+</script>

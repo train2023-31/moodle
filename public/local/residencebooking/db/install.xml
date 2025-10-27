@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<XMLDB PATH="local/residencebooking/db" VERSION="2025061700"
+    COMMENT="XMLDB file for Moodle local/residencebooking"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="../../../lib/xmldb/xmldb.xsd"
+>
+  <TABLES>
+
+    <!-- ============================================================
+         Requests
+    ============================================================ -->
+    <TABLE NAME="local_residencebooking_request" COMMENT="Guest residence requests">
+      <FIELDS>
+        <FIELD NAME="id"             TYPE="int"  LENGTH="10" NOTNULL="true"  SEQUENCE="true"/>
+        <FIELD NAME="courseid"       TYPE="int"  LENGTH="10" NOTNULL="true"  DEFAULT="0"/>
+        <FIELD NAME="status_id"      TYPE="int"  LENGTH="10" NOTNULL="true"  COMMENT="FK → local_status"/>
+        <FIELD NAME="residence_type" TYPE="int"  LENGTH="10" NOTNULL="true"  COMMENT="FK → local_residencebooking_types"/>
+        <FIELD NAME="start_date"     TYPE="int"  LENGTH="10" NOTNULL="false"/>
+        <FIELD NAME="end_date"       TYPE="int"  LENGTH="10" NOTNULL="false"/>
+        <FIELD NAME="purpose"        TYPE="int"  LENGTH="10" NOTNULL="false" COMMENT="FK → local_residencebooking_purpose"/>
+        <FIELD NAME="notes"          TYPE="text"             NOTNULL="false"/>
+        <FIELD NAME="userid"         TYPE="int"  LENGTH="10" NOTNULL="true"/>
+        <FIELD NAME="guest_name"     TYPE="char" LENGTH="255" NOTNULL="true" COMMENT="Full name sourced from Oracle (DUNIA_EMPLOYEES/DUNIA_PERSONAL_DETAILS) via oracle_manager"/>
+        <FIELD NAME="service_number" TYPE="char" LENGTH="20"  NOTNULL="true"  COMMENT="Identifier/PF number sourced from Oracle via oracle_manager"/>
+        <FIELD NAME="rejection_note" TYPE="text"             NOTNULL="false"/>
+        <FIELD NAME="approval_note"  TYPE="text"             NOTNULL="false"/>
+        <FIELD NAME="timecreated"    TYPE="int"  LENGTH="10" NOTNULL="true"  DEFAULT="0" COMMENT="Record creation time"/>
+        <FIELD NAME="timemodified"   TYPE="int"  LENGTH="10" NOTNULL="true"  DEFAULT="0" COMMENT="Record last modified time"/>
+        <FIELD NAME="created_by"     TYPE="int"  LENGTH="10" NOTNULL="false" COMMENT="User ID who created the request"/>
+        <FIELD NAME="modified_by"    TYPE="int"  LENGTH="10" NOTNULL="false" COMMENT="User ID who last modified the request"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary"     TYPE="primary" FIELDS="id"/>
+        <KEY NAME="course_fk"   TYPE="foreign" FIELDS="courseid"        REFTABLE="course" REFFIELDS="id"/>
+        <KEY NAME="status_fk"   TYPE="foreign" FIELDS="status_id"       REFTABLE="local_status" REFFIELDS="id"/>
+        <KEY NAME="type_fk"     TYPE="foreign" FIELDS="residence_type"  REFTABLE="local_residencebooking_types" REFFIELDS="id"/>
+        <KEY NAME="purpose_fk"  TYPE="foreign" FIELDS="purpose"         REFTABLE="local_residencebooking_purpose" REFFIELDS="id"/>
+        <KEY NAME="userid_fk"   TYPE="foreign" FIELDS="userid"          REFTABLE="user" REFFIELDS="id"/>
+      </KEYS>
+    </TABLE>
+
+    <!-- ============================================================
+         Lookup – Residence Types
+    ============================================================ -->
+    <TABLE NAME="local_residencebooking_types" COMMENT="Residence types">
+      <FIELDS>
+        <FIELD NAME="id"           TYPE="int"  LENGTH="10"  NOTNULL="true"  SEQUENCE="true"/>
+        <FIELD NAME="type_name_en" TYPE="char" LENGTH="255" NOTNULL="true" COMMENT="English name for the residence type"/>
+        <FIELD NAME="type_name_ar" TYPE="char" LENGTH="255" NOTNULL="true" COMMENT="Arabic name for the residence type"/>
+        <FIELD NAME="deleted"      TYPE="int"  LENGTH="1"   NOTNULL="true"  DEFAULT="0" COMMENT="Soft‑delete flag"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+      </KEYS>
+      <INDEXES>
+        <INDEX NAME="type_name_en_idx" UNIQUE="false" FIELDS="type_name_en"/>
+        <INDEX NAME="type_name_ar_idx" UNIQUE="false" FIELDS="type_name_ar"/>
+      </INDEXES>
+    </TABLE>
+
+    <!-- ============================================================
+         Lookup – Residence Purposes
+    ============================================================ -->
+    <TABLE NAME="local_residencebooking_purpose" COMMENT="Residence purposes">
+      <FIELDS>
+        <FIELD NAME="id"              TYPE="int"  LENGTH="10"  NOTNULL="true"  SEQUENCE="true"/>
+        <FIELD NAME="description_en"  TYPE="char" LENGTH="255" NOTNULL="true"  COMMENT="English description for the purpose"/>
+        <FIELD NAME="description_ar"  TYPE="char" LENGTH="255" NOTNULL="true"  COMMENT="Arabic description for the purpose"/>
+        <FIELD NAME="deleted"         TYPE="int"  LENGTH="1"   NOTNULL="true"  DEFAULT="0" COMMENT="Soft‑delete flag"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+      </KEYS>
+      <INDEXES>
+        <INDEX NAME="description_en_idx" UNIQUE="false" FIELDS="description_en"/>
+        <INDEX NAME="description_ar_idx" UNIQUE="false" FIELDS="description_ar"/>
+      </INDEXES>
+    </TABLE>
+
+  </TABLES>
+</XMLDB>

@@ -1,0 +1,377 @@
+<!-- local/roombooking/templates/table_classroom_booking.mustache -->
+
+<div class="table-container">
+    <!-- Notification Area -->
+    <div id="notification-area" aria-live="polite"></div>
+    <table class="custom-table">
+        <thead>
+            <tr>
+                <th>{{column_course}}</th>
+                <th>{{column_room}}</th>
+                <th>{{column_capacity}}</th>
+                <th>{{column_start_date}}</th>
+                <th>{{column_start_time}}</th>
+                <th>{{column_end_time}}</th>
+                <th>{{column_recurrence}}</th>
+                <th>{{column_user}}</th>
+                <th>{{column_status}}</th>
+            </tr>
+        </thead>
+        <tbody>
+            {{#records}}
+            <tr id="row_{{id}}">
+                <td>{{course_name}}</td>
+                <td>{{room_name}}</td>
+                <td>{{capacity}}</td>
+                <td>{{start_date}}</td>
+                <td>{{start_time}}</td>
+                <td>{{end_time}}</td>
+                <td>{{recurrence_label}}</td>
+                <td>{{fullname}}</td>
+               <!-- <td class="status-cell">
+                    {{#status_pending}}{{#str}}status_pending, local_roombooking{{/str}}{{/status_pending}}
+                    {{#status_approved}}{{#str}}status_approved, local_roombooking{{/str}}{{/status_approved}}
+                    {{#status_rejected}}{{#str}}status_rejected, local_roombooking{{/str}}{{/status_rejected}}
+                </td> -->
+                 <td>{{readable_status}}</td>
+            </tr>
+
+            <!-- Reject Modal for this record -->
+            <div id="rejectModal-{{id}}" class="custom-modal" role="dialog" aria-modal="true" aria-labelledby="rejectModalTitle-{{id}}">
+                <div class="modal-content">
+                    <span class="close" onclick="closeRejectModal({{id}})" aria-label="Close">&times;</span>
+                    <h2 id="rejectModalTitle-{{id}}">{{#str}} reject_request, local_roombooking {{/str}}</h2>
+                    <p>{{#str}} reject_confirmation, local_roombooking {{/str}}</p>
+                    <div class="form-group">
+                        <textarea id="rejectNote-{{id}}" name="rejection_note" class="form-control" rows="4" placeholder="{{#str}} reject_note_placeholder, local_roombooking {{/str}}" required></textarea>
+                        <div class="invalid-feedback" style="color: red; display: none;">
+                            {{#str}} reject_note_required, local_roombooking {{/str}}
+                        </div>
+                    </div>
+                    <div class="modal-buttons">
+                        <!-- <button class="btn btn-danger" onclick="showModal('', '', () => approveHandeler({{id}}))"> -->
+                        <button class="btn btn-danger" onclick="confirmReject({{id}})">
+
+                            {{#str}} confirm, local_roombooking {{/str}}
+                        </button>
+                        <button class="btn btn-secondary" onclick="closeRejectModal({{id}})">
+                            {{#str}} cancel, local_roombooking {{/str}}
+                        </button>
+                    </div>
+                </div>
+            </div>
+            {{/records}}
+        </tbody>
+    </table>
+
+    <!-- Include the necessary JavaScript -->
+    <script>
+     const actionUrlBase = '{{{ js.action_url_base }}}'; 
+     const sesskey = '{{{ js.sesskey }}}';
+
+    function approveHandler(requestId) {
+        
+         const data = {
+                    action: 'approve',
+                    id: requestId,
+                    sesskey: sesskey
+                };
+        fetch(actionUrlBase, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(data),
+                    credentials: 'same-origin' 
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(result => {
+                    if (result.status === 'success') {
+                        location.reload();
+                    } else {
+                        console.error("Approve Error:", result.message);
+                    }
+                })
+                .catch(error => {
+                    console.error("Fetch Error:", error);
+                });
+    }
+   
+   function rejectHandler(requestId) {
+       
+  const data = {
+                    action: 'reject',
+                    id: requestId,
+                    rejection_note: rejectionNote,
+                    sesskey: sesskey
+                };
+        fetch(actionUrlBase, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(data),
+                    credentials: 'same-origin' 
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(result => {
+                    if (result.status === 'success') {
+                        location.reload();
+                    } else {
+                        console.error("Approve Error:", result.message);
+                    }
+                })
+                .catch(error => {
+                    console.error("Fetch Error:", error);
+                });
+    }
+        document.addEventListener("DOMContentLoaded", function () {
+            // Function to show the Reject Modal
+            window.showRejectModal = function (requestId) {
+                const modal = document.getElementById('rejectModal-' + requestId);
+                if (modal) {
+                    modal.style.display = "block";
+                    modal.classList.add("show");
+                    console.log("Showing Reject Modal for ID:", requestId);
+                } else {
+                    console.error("Reject Modal not found for ID:", requestId);
+                }
+            };
+
+            // Function to hide the Reject Modal
+            window.closeRejectModal = function (requestId) {
+                const modal = document.getElementById('rejectModal-' + requestId);
+                if (modal) {
+                    modal.style.display = "none";
+                    modal.classList.remove("show");
+                    console.log("Hiding Reject Modal for ID:", requestId);
+                } else {
+                    console.error("Reject Modal not found for ID:", requestId);
+                }
+            };
+
+            // Function to confirm rejection via AJAX
+            window.confirmReject = function (requestId) {
+                console.log("Confirming rejection for ID:", requestId);
+
+                const rejectNoteTextarea = document.getElementById('rejectNote-' + requestId);
+                const rejectionNote = rejectNoteTextarea.value.trim();
+                const invalidFeedback = rejectNoteTextarea.nextElementSibling;
+
+                if (rejectionNote === "") {
+                    // Show validation error
+                    rejectNoteTextarea.classList.add('is-invalid');
+                    invalidFeedback.style.display = "block";
+                    console.log("Rejection note is empty for ID:", requestId);
+                    return;
+                } else {
+                    // Hide validation error
+                    rejectNoteTextarea.classList.remove('is-invalid');
+                    invalidFeedback.style.display = "none";
+                }
+
+                // Prepare the data to send
+                const data = {
+                    action: 'reject',
+                    id: requestId,
+                    rejection_note: rejectionNote,
+                    sesskey: sesskey
+                };
+
+                // Send AJAX POST request
+                fetch(actionUrlBase, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(data),
+                    credentials: 'same-origin'  // Include cookies for session
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(result => {
+                    if (result.status === 'success') {
+                        const row = document.getElementById('row_' + requestId);
+                        const statusCell = row.querySelector('.status-cell');
+                        statusCell.innerHTML = result.newstatus + '<br>' + result.rejection_note;
+
+                        // Optionally disable buttons after rejection
+                        const approveButton = row.querySelector('.btn-success');
+                        const rejectButton = row.querySelector('.btn-danger');
+                        approveButton.disabled = true;
+                        rejectButton.disabled = true;
+
+                        // Remove the alert and show notification
+                        // alert(result.message);
+                        showNotification(result.message);
+
+                        closeRejectModal(requestId);
+                    } else {
+                        // Handle errors
+                        // alert("Error: " + result.message);
+                        showNotification("Error: " + result.message, 'error');
+                        console.error("Reject Error:", result.message);
+                    }
+                })
+                .catch(error => {
+                    console.error("Fetch Error:", error);
+                    // alert("An unexpected error occurred.");
+                    showNotification("An unexpected error occurred.", 'error');
+                });
+            };
+
+            // Close modals when clicking outside of them
+            window.onclick = function(event) {
+                // Iterate through all approve modals
+                const approveModals = document.querySelectorAll('.custom-modal[id^="approveModal-"]');
+                approveModals.forEach(function(modal) {
+                    if (event.target == modal) {
+                        modal.style.display = "none";
+                        modal.classList.remove("show");
+                        console.log("Clicked outside Approve Modal for ID:", modal.id.split('-')[1]);
+                    }
+                });
+
+                // Iterate through all reject modals
+                const rejectModals = document.querySelectorAll('.custom-modal[id^="rejectModal-"]');
+                rejectModals.forEach(function(modal) {
+                    if (event.target == modal) {
+                        modal.style.display = "none";
+                        modal.classList.remove("show");
+                        console.log("Clicked outside Reject Modal for ID:", modal.id.split('-')[1]);
+                    }
+                });
+            };
+
+            // Handle Esc key to close modals
+            document.addEventListener('keydown', function(event) {
+                if (event.key === "Escape") {
+                    // Close all approve modals
+                    const approveModals = document.querySelectorAll('.custom-modal[id^="approveModal-"].show');
+                    approveModals.forEach(function(modal) {
+                        modal.style.display = "none";
+                        modal.classList.remove("show");
+                        console.log("Esc key pressed: Closed Approve Modal for ID:", modal.id.split('-')[1]);
+                    });
+
+                    // Close all reject modals
+                    const rejectModals = document.querySelectorAll('.custom-modal[id^="rejectModal-"].show');
+                    rejectModals.forEach(function(modal) {
+                        modal.style.display = "none";
+                        modal.classList.remove("show");
+                        console.log("Esc key pressed: Closed Reject Modal for ID:", modal.id.split('-')[1]);
+                    });
+                }
+            });
+
+        });
+    </script>
+
+    <!-- CSS Styles -->
+    <style>
+        /* Notification Styles */
+        #notification-area {
+            display: none;
+            padding: 10px;
+            margin-bottom: 15px;
+            border-radius: 4px;
+        }
+        .notification.success {
+            background-color: #dff0d8;
+            color: #3c763d;
+        }
+        .notification.error {
+            background-color: #f2dede;
+            color: #a94442;
+        }
+
+        /* Modal Styles */
+        .custom-modal {
+            display: none; /* Hidden by default */
+            position: fixed; /* Stay in place */
+            z-index: 1001; /* Sit on top */
+            left: 0;
+            top: 0;
+            width: 100%; /* Full width */
+            height: 100%; /* Full height */
+            overflow: auto; /* Enable scroll if needed */
+            background-color: rgba(0,0,0,0.5); /* Black w/ opacity */
+            transition: opacity 0.3s ease;
+        }
+
+        .custom-modal.show {
+            display: block;
+            opacity: 1;
+        }
+
+        .modal-content {
+            background-color: #fefefe;
+            margin: 10% auto; /* 10% from the top and centered */
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%; /* Could be more or less, depending on screen size */
+            max-width: 500px;
+            border-radius: 5px;
+            position: relative;
+            animation-name: modalopen;
+            animation-duration: 0.5s;
+        }
+
+        @keyframes modalopen {
+            from {opacity: 0;}
+            to {opacity: 1;}
+        }
+
+        .modal-content h2 {
+            margin-top: 0;
+            font-size: 1.5em;
+        }
+
+        .close {
+            color: #aaa;
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .close:hover,
+        .close:focus {
+            color: black;
+            text-decoration: none;
+        }
+
+        .modal-buttons {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .modal-buttons .btn {
+            min-width: 100px;
+        }
+
+        .invalid-feedback {
+            display: none;
+        }
+
+        /* Additional styles as needed */
+    </style>
+</div>

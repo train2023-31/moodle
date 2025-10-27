@@ -1,0 +1,28 @@
+## Course Creation Form Bug: Missing Course Date Field
+
+### Problem Description
+When adding a new course through the form at `/local/annualplans/add_course.php`, the form only asks for "Duration (days)" and does **not** require or set a course date (`coursedate`).
+
+### Impact
+- The annual report block only displays courses where the `coursedate` field is a valid timestamp within the current year.
+- If the course is created without a valid `coursedate`, it will **not appear** in the annual report, even if all other fields (approval, level, etc.) are correct.
+- This leads to confusion, as users expect newly added courses to show up in the report but they do not.
+
+### Root Cause
+- The form collects "Duration (days)" (a number), but not the actual course date.
+- The `coursedate` field in the database is left empty, invalid, or set to a default value that does not match the current year.
+
+### Recommendation
+- Update the course creation form to include a required course date field (date picker).
+- Ensure the selected date is saved as a Unix timestamp in the `coursedate` field of the `local_annual_plan_course` table.
+- This will ensure new courses are eligible to appear in the annual report for the correct year.
+
+### Solution
+### Solution Steps:
+
+1. Update the form to use annualplans.id as the primary identifier
+2. Remove reliance on coursedate/duration fields
+3. Modify queries to join with annualplans table
+4. Update display logic to show courses based on annualplans year
+
+This will provide a more reliable way to track and display courses in the annual report, while maintaining consistency with the annualplans system.
