@@ -56,18 +56,18 @@ Local plugins are used in cases when no standard plugin fits, examples are:
 * custom admin settings
 
 Standard plugin features:
-* /local/pluginname/version.php - version of script (must be incremented after changes)
-* /local/pluginname/db/install.xml - executed during install (new version.php found)
-* /local/pluginname/db/install.php - executed right after install.xml
-* /local/pluginname/db/uninstall.php - executed during uninstallation
-* /local/pluginname/db/upgrade.php - executed after version.php change
-* /local/pluginname/db/access.php - definition of capabilities
-* /local/pluginname/db/events.php - event handlers and subscripts
-* /local/pluginname/db/messages.php - messaging registration
-* /local/pluginname/db/services.php - definition of web services and web service functions
-* /local/pluginname/db/subplugins.php - list of subplugins types supported by this local plugin
-* /local/pluginname/lang/en/local_pluginname.php - language file
-* /local/pluginname/settings.php - admin settings
+* Public/local/pluginname/version.php - version of script (must be incremented after changes)
+* Public/local/pluginname/db/install.xml - executed during install (new version.php found)
+* Public/local/pluginname/db/install.php - executed right after install.xml
+* Public/local/pluginname/db/uninstall.php - executed during uninstallation
+* Public/local/pluginname/db/upgrade.php - executed after version.php change
+* Public/local/pluginname/db/access.php - definition of capabilities
+* Public/local/pluginname/db/events.php - event handlers and subscripts
+* Public/local/pluginname/db/messages.php - messaging registration
+* Public/local/pluginname/db/services.php - definition of web services and web service functions
+* Public/local/pluginname/db/subplugins.php - list of subplugins types supported by this local plugin
+* Public/local/pluginname/lang/en/local_pluginname.php - language file
+* Public/local/pluginname/settings.php - admin settings
 
 
 Local plugin version specification
